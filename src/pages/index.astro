@@ -1,11 +1,78 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
+const whatsappLink = (product: string) => {
+	const text = encodeURIComponent(`Hola Mozart, quiero consultar por ${product}.`);
+	return whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${text}` : `https://wa.me/?text=${text}`;
+};
+const products = [
+	{ name: 'Yamaha F310', type: 'Guitarra acústica', price: 'Desde ₡95.000', image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1200&q=85' },
+	{ name: 'Casio CDP-S110', type: 'Piano digital', price: 'Desde ₡295.000', image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=1200&q=85' },
+	{ name: 'Squier Sonic Bass', type: 'Bajo eléctrico', price: 'Desde ₡145.000', image: 'https://images.unsplash.com/photo-1558098329-a11cff621064?auto=format&fit=crop&w=1200&q=85' },
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Mozart — Instrumentos que te encuentran">
+	<main>
+		<nav class="nav" aria-label="Navegación principal"><a class="wordmark" href="#inicio">MOZART<span>®</span></a><div class="nav-links"><a href="#seleccion">Selección</a><a href="#instrumentos">Instrumentos</a><a class="nav-cta" href={whatsappLink('instrumentos disponibles')} target="_blank" rel="noreferrer">WhatsApp</a></div></nav>
+		<section id="inicio" class="hero"><div class="hero-copy"><p class="eyebrow">Alajuela, Costa Rica</p><h1>Que la música<br /><em>te encuentre.</em></h1><p class="hero-note">Instrumentos y accesorios elegidos para que empieces, vuelvas o llegues más lejos.</p><a class="button button-light" href="#seleccion">Ver la selección <span>↓</span></a></div><div class="hero-art" aria-hidden="true"><div class="orb orb-one"></div><div class="orb orb-two"></div><img src="https://images.unsplash.com/photo-1525201548942-d8732f6617a0?auto=format&fit=crop&w=1600&q=90" alt="" /><p class="hero-index">01 / 03</p></div></section>
+		<section class="manifesto" aria-label="La propuesta de Mozart"><p>El buen sonido no debe sentirse lejano. En Mozart conectamos a músicos de toda Costa Rica con ese próximo instrumento, cable o amplificador que hace falta para seguir ejecutando.</p></section>
+		<section id="seleccion" class="selection section-wrap"><div class="section-heading"><p class="eyebrow">Elegidos para sonar bien</p><h2>Tres maneras de<br />hacer <em>ruido.</em></h2></div><div class="product-grid">{products.map((product, index) => <article class:list={['product-card', `product-${index + 1}`]}><a class="product-image" href={whatsappLink(product.name)} target="_blank" rel="noreferrer" aria-label={`Consultar ${product.name} por WhatsApp`}><img src={product.image} alt={product.name} loading="lazy" /><span>{String(index + 1).padStart(2, '0')}</span></a><div class="product-info"><div><p>{product.type}</p><h3>{product.name}</h3></div><p class="price">{product.price}</p></div><a class="text-link" href={whatsappLink(product.name)} target="_blank" rel="noreferrer">Consultar por WhatsApp <span>↗</span></a></article>)}</div></section>
+		<section id="instrumentos" class="catalogue"><div class="catalogue-sticky"><p class="eyebrow">Todo para seguir ejecutando</p><h2>Tu próximo<br /><em>capítulo</em> suena aquí.</h2><a class="button button-dark" href={whatsappLink('el catálogo completo')} target="_blank" rel="noreferrer">Preguntar por disponibilidad <span>↗</span></a></div><div class="catalogue-list"><div class="catalogue-item"><span>Guitarras & bajos</span><img src="https://picsum.photos/seed/guitarras-mozart/800/550" alt="Guitarra eléctrica" loading="lazy" /></div><div class="catalogue-item"><span>Pianos & teclados</span><img src="https://picsum.photos/seed/piano-mozart/800/550" alt="Piano" loading="lazy" /></div><div class="catalogue-item"><span>Sonido & estudio</span><img src="https://picsum.photos/seed/sonido-mozart/800/550" alt="Equipo de sonido" loading="lazy" /></div><div class="catalogue-item"><span>Cuerdas & percusión</span><img src="https://picsum.photos/seed/percussion-mozart/800/550" alt="Instrumentos de percusión" loading="lazy" /></div></div></section>
+		<section class="marquee" aria-label="Categorías disponibles"><div>GUITARRAS · BAJOS · PIANOS · UKELELES · CUERDAS · GIG BAGS · MIXERS · SPEAKERS · CABLES · BATERÍAS · VIOLINES · VIOLAS · CELLOS ·</div></section>
+		<section class="closing"><p class="eyebrow">Hablemos de música</p><h2>Ese instrumento<br />ya te está <em>esperando.</em></h2><a class="button button-light" href={whatsappLink('un instrumento')} target="_blank" rel="noreferrer">Escribir por WhatsApp <span>↗</span></a></section>
+	</main>
+	<footer><a class="wordmark" href="#inicio">MOZART<span>®</span></a><p>Alajuela, Costa Rica · Hecho para músicos</p><a href={whatsappLink('Mozart')} target="_blank" rel="noreferrer">WhatsApp ↗</a></footer>
 </Layout>
+
+<script>
+	import { gsap } from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	gsap.registerPlugin(ScrollTrigger);
+	gsap.from('.hero-copy > *', { y: 36, opacity: 0, duration: 1, stagger: 0.12, ease: 'power3.out', delay: 0.15 });
+	gsap.from('.hero-art', { scale: 0.88, opacity: 0, duration: 1.2, ease: 'power3.out' });
+	gsap.utils.toArray<HTMLElement>('.product-card').forEach((card) => gsap.fromTo(card, { scale: 0.86, opacity: 0.15 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top 85%', end: 'bottom 50%', scrub: true } }));
+	ScrollTrigger.matchMedia({ '(min-width: 900px)': () => ScrollTrigger.create({ trigger: '.catalogue', start: 'top top+=48', end: 'bottom bottom', pin: '.catalogue-sticky', pinSpacing: false }) });
+</script>
+
+<style>
+	:global(*){box-sizing:border-box}:global(html){scroll-behavior:smooth;background:#171712}:global(body){margin:0;background:#f2eee5;color:#171712;font-family:"Cabinet Grotesk","Arial Narrow",Arial,sans-serif}main{overflow-x:hidden;width:100%;max-width:100%}.nav{position:absolute;z-index:5;top:0;left:0;width:100%;padding:28px 4vw;display:flex;justify-content:space-between;align-items:center;color:#f5f1e8}.wordmark{font-size:1.35rem;font-weight:900;letter-spacing:-.08em;color:inherit;text-decoration:none}.wordmark span{font-size:.47em;vertical-align:top;margin-left:.12rem}.nav-links{display:flex;gap:24px;align-items:center;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.nav a{color:inherit;text-decoration:none}.nav-cta{border:1px solid rgba(255,255,255,.5);padding:10px 14px;border-radius:999px}.hero{min-height:100svh;background:#1d1d18;color:#f5f1e8;display:grid;grid-template-columns:1fr 1.06fr;align-items:end;overflow:hidden;position:relative}.hero-copy{position:relative;z-index:2;padding:12vh 4vw 9vh}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-weight:800;font-size:.68rem;margin:0 0 24px}h1,h2,h3,p{margin-top:0}h1,h2{letter-spacing:-.075em;font-weight:800;line-height:.87}h1{max-width:72rem;font-size:clamp(3.9rem,7.5vw,8.8rem);margin-bottom:34px}em{color:#d9e47a;font-family:Georgia,serif;font-weight:400;letter-spacing:-.1em}.hero-note{max-width:26rem;color:#c9c6ba;line-height:1.45;font-size:1rem;margin-bottom:34px}.button{display:inline-flex;gap:20px;align-items:center;border-radius:999px;padding:15px 21px;font-size:.76rem;font-weight:800;letter-spacing:.03em;text-decoration:none;transition:transform .3s ease,background .3s ease}.button:hover{transform:translateY(-3px)}.button-light{background:#f5f1e8;color:#171712}.button-dark{background:#171712;color:#f5f1e8}.hero-art{height:86vh;position:relative;overflow:hidden;border-radius:220px 0 0 0}.hero-art:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#1d1d18 0%,transparent 30%),linear-gradient(0deg,rgba(0,0,0,.4),transparent 45%)}.hero-art img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.2);opacity:.84}.hero-index{position:absolute;bottom:30px;right:4vw;z-index:1;font-size:.72rem;letter-spacing:.15em}.orb{position:absolute;z-index:1;border-radius:50%;filter:blur(3px);mix-blend-mode:screen}.orb-one{height:19vw;width:19vw;background:#d9e47a;top:8%;right:15%;opacity:.34}.orb-two{height:8vw;width:8vw;background:#f18e60;bottom:19%;left:15%;opacity:.32}.manifesto{min-height:64vh;display:grid;place-items:center;padding:14vh 8vw;background:#d9e47a}.manifesto p{max-width:62rem;font-size:clamp(2rem,4.2vw,4.9rem);line-height:.99;letter-spacing:-.065em;margin:0;text-align:center;font-weight:750}.section-wrap{padding:19vh 4vw}.section-heading{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:72px}.section-heading h2,.catalogue h2,.closing h2{font-size:clamp(3.2rem,6.2vw,7rem);margin:0}.product-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-flow:dense;gap:1px;background:#cdc8bc}.product-card{background:#f2eee5;padding:16px}.product-1{grid-column:span 7}.product-2{grid-column:span 5}.product-3{grid-column:span 12;display:grid;grid-template-columns:1.2fr .8fr;gap:20px}.product-image{display:block;height:clamp(340px,48vw,680px);position:relative;overflow:hidden;background:#aaa}.product-3 .product-image{height:420px}.product-image img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.13);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s ease}.product-image:hover img{transform:scale(1.06);filter:grayscale(.2) contrast(1.1)}.product-image span{position:absolute;top:14px;left:14px;color:#f5f1e8;font-size:.72rem;font-weight:700;z-index:1}.product-info{padding:18px 0 14px;display:flex;justify-content:space-between;align-items:flex-end}.product-info p{color:#737166;font-size:.76rem;margin-bottom:5px}.product-info h3{font-size:clamp(1.6rem,2.6vw,3rem);letter-spacing:-.065em;margin:0}.product-info .price{color:#171712;font-weight:700;text-align:right}.text-link{display:block;color:#171712;font-size:.73rem;text-decoration:none;font-weight:800;text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid #171712;padding:6px 0}.text-link span{float:right;font-size:1rem}.catalogue{padding:18vh 4vw;display:grid;grid-template-columns:1fr 1fr;gap:8vw;background:#24241e;color:#f5f1e8}.catalogue-sticky{align-self:start;padding-top:2vh}.catalogue-sticky h2{margin-bottom:45px}.catalogue-list{display:grid;gap:50px}.catalogue-item{position:relative;overflow:hidden}.catalogue-item span{position:absolute;z-index:1;left:20px;bottom:18px;color:#f5f1e8;font-size:clamp(1.4rem,2.4vw,2.5rem);font-weight:800;letter-spacing:-.06em}.catalogue-item img{width:100%;display:block;aspect-ratio:1.34;object-fit:cover;filter:grayscale(1) contrast(1.2);transition:transform .7s ease}.catalogue-item:hover img{transform:scale(1.05)}.marquee{background:#f18e60;overflow:hidden;white-space:nowrap;padding:20px 0;font-size:clamp(1.4rem,3vw,3.6rem);font-weight:800;letter-spacing:-.06em}.marquee div{animation:scroll 28s linear infinite;width:max-content}@keyframes scroll{to{transform:translateX(-25%)}}.closing{min-height:86vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12vh 4vw;color:#f5f1e8;background:radial-gradient(circle at 50% 20%,#4b5640,#171712 58%)}.closing h2{margin-bottom:45px}footer{background:#171712;color:#f5f1e8;padding:26px 4vw;display:flex;gap:20px;justify-content:space-between;align-items:center;border-top:1px solid #56564e;font-size:.75rem}footer p{margin:0;color:#b0aea5}footer a{color:inherit;text-decoration:none}@media(max-width:760px){.nav{padding:20px 6vw}.nav-links a:not(.nav-cta){display:none}.hero{grid-template-columns:1fr;min-height:820px}.hero-copy{padding:150px 6vw 30px}.hero-art{height:46vh;border-radius:100px 0 0 0;margin-left:10vw}.section-wrap{padding:14vh 6vw}.section-heading{display:block}.section-heading h2{margin-top:30px}.product-grid{display:block;background:transparent}.product-card{padding:0 0 48px;margin-bottom:20px}.product-3{display:block}.product-3 .product-image,.product-2 .product-image,.product-image{height:110vw;max-height:520px}.catalogue{padding:14vh 6vw;grid-template-columns:1fr;gap:9vh}.catalogue-list{gap:24px}.catalogue-item img{aspect-ratio:1.1}footer{padding:24px 6vw;flex-wrap:wrap}footer p{order:3;width:100%}}
+</style>
+
+<style>
+	@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap');
+
+	:global(body) { background: #030712; color: #ffffff; font-family: 'Geist', sans-serif; }
+	.hero { background: #030712; }
+	.hero-art:after { background: linear-gradient(90deg, #030712 0%, transparent 34%), linear-gradient(0deg, rgba(3, 7, 18, .55), transparent 45%); }
+	.hero-note, footer p { color: #a1a1aa; }
+	em { color: #06b6d4; }
+	.eyebrow, .nav-links, .text-link { font-family: 'JetBrains Mono', monospace; }
+	.nav-cta { border-color: #27272a; background: rgba(24, 24, 27, .72); }
+	.button-light { background: #4f46e5; color: #ffffff; }
+	.button-dark { background: #4f46e5; color: #ffffff; }
+	.manifesto { background: #18181b; color: #ffffff; }
+	.product-grid { gap: 1px; background: #27272a; border: 1px solid #27272a; }
+	.product-card { background: #18181b; }
+	.product-image { background: #030712; }
+	.product-info p { color: #a1a1aa; font-family: 'JetBrains Mono', monospace; }
+	.product-info .price, .text-link { color: #ffffff; }
+	.text-link { border-bottom-color: #27272a; }
+	.catalogue { background: #030712; }
+	.catalogue-item img { filter: grayscale(1) contrast(1.08) brightness(.72); }
+	.marquee { background: #4f46e5; color: #ffffff; }
+	.closing { background: radial-gradient(circle at 50% 20%, #18181b, #030712 62%); }
+	footer { background: #030712; border-top-color: #27272a; }
+	.button:focus-visible, .nav a:focus-visible, .text-link:focus-visible { outline: 2px solid #06b6d4; outline-offset: 4px; }
+</style>
+
+<style>
+	@media (max-width: 760px) {
+		.product-info,
+		.text-link {
+			margin-right: 16px;
+			margin-left: 16px;
+		}
+	}
+</style>
