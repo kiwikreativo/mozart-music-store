@@ -1,0 +1,14 @@
+---
+interface Props { catalogueUrl: string }
+const { catalogueUrl } = Astro.props;
+---
+
+<section id="instrumentos" class="catalogue">
+	<div class="catalogue-sticky"><p class="eyebrow">Todo para seguir ejecutando</p><h2>Tu próximo<br /><em>capítulo</em> suena aquí.</h2><a class="button button-dark" href={catalogueUrl} target="_blank" rel="noreferrer">Preguntar por disponibilidad <span>↗</span></a></div>
+	<div class="catalogue-list">
+		<div class="catalogue-item"><span>Guitarras & bajos</span><img src="https://picsum.photos/seed/guitarras-mozart/800/550" alt="Guitarra eléctrica" loading="lazy" /></div>
+		<div class="catalogue-item"><span>Pianos & teclados</span><img src="https://picsum.photos/seed/piano-mozart/800/550" alt="Piano" loading="lazy" /></div>
+		<div class="catalogue-item"><span>Sonido & estudio</span><img src="https://picsum.photos/seed/sonido-mozart/800/550" alt="Equipo de sonido" loading="lazy" /></div>
+		<div class="catalogue-item"><span>Cuerdas & percusión</span><img src="https://picsum.photos/seed/percussion-mozart/800/550" alt="Instrumentos de percusión" loading="lazy" /></div>
+	</div>
+</section>

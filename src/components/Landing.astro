@@ -1,0 +1,47 @@
+---
+import CategoryMarquee from './landing/CategoryMarquee.astro';
+import ClosingCta from './landing/ClosingCta.astro';
+import Footer from './landing/Footer.astro';
+import Hero from './landing/Hero.astro';
+import InstrumentCatalogue from './landing/InstrumentCatalogue.astro';
+import Manifesto from './landing/Manifesto.astro';
+import Navigation from './landing/Navigation.astro';
+import ProductSelection from './landing/ProductSelection.astro';
+
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
+const whatsappLink = (product: string) => {
+	const text = encodeURIComponent(`Hola Mozart, quiero consultar por ${product}.`);
+	return whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${text}` : `https://wa.me/?text=${text}`;
+};
+const products = [
+	{ name: 'Yamaha F310', type: 'Guitarra acústica', price: 'Desde ₡95.000', image: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1200&q=85' },
+	{ name: 'Casio CDP-S110', type: 'Piano digital', price: 'Desde ₡295.000', image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=1200&q=85' },
+	{ name: 'Squier Sonic Bass', type: 'Bajo eléctrico', price: 'Desde ₡145.000', image: 'https://images.unsplash.com/photo-1558098329-a11cff621064?auto=format&fit=crop&w=1200&q=85' },
+];
+---
+
+<main>
+	<Navigation whatsappUrl={whatsappLink('instrumentos disponibles')} />
+	<Hero />
+	<Manifesto />
+	<ProductSelection {products} {whatsappLink} />
+	<InstrumentCatalogue catalogueUrl={whatsappLink('el catálogo completo')} />
+	<CategoryMarquee />
+	<ClosingCta whatsappUrl={whatsappLink('un instrumento')} />
+</main>
+<Footer whatsappUrl={whatsappLink('Mozart')} />
+
+<script>
+	import { gsap } from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	gsap.registerPlugin(ScrollTrigger);
+	gsap.from('.hero-copy > *', { y: 36, opacity: 0, duration: 1, stagger: 0.12, ease: 'power3.out', delay: 0.15 });
+	gsap.from('.hero-art', { scale: 0.88, opacity: 0, duration: 1.2, ease: 'power3.out' });
+	gsap.utils.toArray<HTMLElement>('.product-card').forEach((card) => gsap.fromTo(card, { scale: 0.86, opacity: 0.15 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top 85%', end: 'bottom 50%', scrub: true } }));
+	ScrollTrigger.matchMedia({ '(min-width: 900px)': () => ScrollTrigger.create({ trigger: '.catalogue', start: 'top top+=48', end: 'bottom bottom', pin: '.catalogue-sticky', pinSpacing: false }) });
+</script>
+
+<style is:global>
+	@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap');
+	*{box-sizing:border-box}html{scroll-behavior:smooth;background:#030712}body{margin:0;background:#030712;color:#fff;font-family:'Geist',sans-serif}main{overflow-x:hidden;width:100%;max-width:100%}.nav{position:absolute;z-index:5;top:0;left:0;width:100%;padding:28px 4vw;display:flex;justify-content:space-between;align-items:center;color:#fff}.wordmark{font-size:1.35rem;font-weight:900;letter-spacing:-.08em;color:inherit;text-decoration:none}.wordmark span{font-size:.47em;vertical-align:top;margin-left:.12rem}.nav-links{display:flex;gap:24px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.nav a{color:inherit;text-decoration:none}.nav-cta{border:1px solid #27272a;background:rgba(24,24,27,.72);padding:10px 14px;border-radius:999px}.hero{min-height:100svh;background:#030712;color:#fff;display:grid;grid-template-columns:1fr 1.06fr;align-items:end;overflow:hidden;position:relative}.hero-copy{position:relative;z-index:2;padding:12vh 4vw 9vh}.eyebrow{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.16em;font-weight:800;font-size:.68rem;margin:0 0 24px}h1,h2,h3,p{margin-top:0}h1,h2{letter-spacing:-.075em;font-weight:800;line-height:.87}h1{max-width:72rem;font-size:clamp(3.9rem,7.5vw,8.8rem);margin-bottom:34px}em{color:#06b6d4;font-family:Georgia,serif;font-weight:400;letter-spacing:-.1em}.hero-note{max-width:26rem;color:#a1a1aa;line-height:1.45;font-size:1rem;margin-bottom:34px}.button{display:inline-flex;gap:20px;align-items:center;border-radius:999px;padding:15px 21px;font-size:.76rem;font-weight:800;letter-spacing:.03em;text-decoration:none;transition:transform .3s ease,background .3s ease}.button:hover{transform:translateY(-3px)}.button-light,.button-dark{background:#4f46e5;color:#fff}.hero-art{height:86vh;position:relative;overflow:hidden;border-radius:220px 0 0 0}.hero-art:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#030712 0%,transparent 34%),linear-gradient(0deg,rgba(3,7,18,.55),transparent 45%)}.hero-art img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.2);opacity:.84}.hero-index{position:absolute;bottom:30px;right:4vw;z-index:1;font-size:.72rem;letter-spacing:.15em}.orb{position:absolute;z-index:1;border-radius:50%;filter:blur(3px);mix-blend-mode:screen}.orb-one{height:19vw;width:19vw;background:#06b6d4;top:8%;right:15%;opacity:.34}.orb-two{height:8vw;width:8vw;background:#4f46e5;bottom:19%;left:15%;opacity:.32}.manifesto{min-height:64vh;display:grid;place-items:center;padding:14vh 8vw;background:#18181b;color:#fff}.manifesto p{max-width:62rem;font-size:clamp(2rem,4.2vw,4.9rem);line-height:.99;letter-spacing:-.065em;margin:0;text-align:center;font-weight:750}.section-wrap{padding:19vh 4vw}.section-heading{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:72px}.section-heading h2,.catalogue h2,.closing h2{font-size:clamp(3.2rem,6.2vw,7rem);margin:0}.product-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-flow:dense;gap:1px;background:#27272a;border:1px solid #27272a}.product-card{background:#18181b;padding:16px}.product-1{grid-column:span 7}.product-2{grid-column:span 5}.product-3{grid-column:span 12;display:grid;grid-template-columns:1.2fr .8fr;gap:20px}.product-image{display:block;height:clamp(340px,48vw,680px);position:relative;overflow:hidden;background:#030712}.product-3 .product-image{height:420px}.product-image img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.13);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s ease}.product-image:hover img{transform:scale(1.06);filter:grayscale(.2) contrast(1.1)}.product-image span{position:absolute;top:14px;left:14px;color:#fff;font-size:.72rem;font-weight:700;z-index:1}.product-info{padding:18px 0 14px;display:flex;justify-content:space-between;align-items:flex-end}.product-info p{color:#a1a1aa;font-family:'JetBrains Mono',monospace;font-size:.76rem;margin-bottom:5px}.product-info h3{font-size:clamp(1.6rem,2.6vw,3rem);letter-spacing:-.065em;margin:0}.product-info .price{color:#fff;font-weight:700;text-align:right}.text-link{display:block;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.73rem;text-decoration:none;font-weight:800;text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid #27272a;padding:6px 0}.text-link span{float:right;font-size:1rem}.catalogue{padding:18vh 4vw;display:grid;grid-template-columns:1fr 1fr;gap:8vw;background:#030712;color:#fff}.catalogue-sticky{align-self:start;padding-top:2vh}.catalogue-sticky h2{margin-bottom:45px}.catalogue-list{display:grid;gap:50px}.catalogue-item{position:relative;overflow:hidden}.catalogue-item span{position:absolute;z-index:1;left:20px;bottom:18px;color:#fff;font-size:clamp(1.4rem,2.4vw,2.5rem);font-weight:800;letter-spacing:-.06em}.catalogue-item img{width:100%;display:block;aspect-ratio:1.34;object-fit:cover;filter:grayscale(1) contrast(1.08) brightness(.72);transition:transform .7s ease}.catalogue-item:hover img{transform:scale(1.05)}.marquee{background:#4f46e5;overflow:hidden;white-space:nowrap;padding:20px 0;font-size:clamp(1.4rem,3vw,3.6rem);font-weight:800;letter-spacing:-.06em}.marquee div{animation:scroll 28s linear infinite;width:max-content}@keyframes scroll{to{transform:translateX(-25%)}}.closing{min-height:86vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12vh 4vw;color:#fff;background:radial-gradient(circle at 50% 20%,#18181b,#030712 62%)}.closing h2{margin-bottom:45px}footer{background:#030712;color:#fff;padding:26px 4vw;display:flex;gap:20px;justify-content:space-between;align-items:center;border-top:1px solid #27272a;font-size:.75rem}footer p{margin:0;color:#a1a1aa}footer a{color:inherit;text-decoration:none}.button:focus-visible,.nav a:focus-visible,.text-link:focus-visible{outline:2px solid #06b6d4;outline-offset:4px}@media(max-width:760px){.nav{padding:20px 6vw}.nav-links a:not(.nav-cta){display:none}.hero{grid-template-columns:1fr;min-height:820px}.hero-copy{padding:150px 6vw 30px}.hero-art{height:46vh;border-radius:100px 0 0 0;margin-left:10vw}.section-wrap{padding:14vh 6vw}.section-heading{display:block}.section-heading h2{margin-top:30px}.product-grid{display:block;background:transparent;border:0}.product-card{padding:0 0 48px;margin-bottom:20px}.product-info,.text-link{margin-right:16px;margin-left:16px}.product-3{display:block}.product-3 .product-image,.product-2 .product-image,.product-image{height:110vw;max-height:520px}.catalogue{padding:14vh 6vw;grid-template-columns:1fr;gap:9vh}.catalogue-list{gap:24px}.catalogue-item img{aspect-ratio:1.1}footer{padding:24px 6vw;flex-wrap:wrap}footer p{order:3;width:100%}}
+</style>
