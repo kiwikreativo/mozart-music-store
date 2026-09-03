@@ -6,6 +6,17 @@ const price = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC
 const filters = JSON.stringify({ type: product.type, brand: product.brand, availability: product.availability, level: product.level, ...product.attributes });
 ---
 <article class="catalog-card" data-product data-price={product.price} data-date={product.date} data-filters={filters}>
-	<div class="catalog-image"><img src={product.image} alt={`${product.brand} ${product.model}`} loading="lazy" /><span class:list={['stock', product.availability === 'Disponible' ? 'in-stock' : '']}>{product.availability}</span></div>
-	<div class="catalog-card-content"><p class="catalog-brand">{product.brand}</p><h2>{product.model}</h2><p class="catalog-meta">{[product.type, ...metaKeys.map((key) => product.attributes[key]).filter(Boolean)].join(' · ')}</p><p class="catalog-price">{price}</p><a href={whatsappUrl} target="_blank" rel="noreferrer">Consultar por WhatsApp <i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a></div>
+	<div class="catalog-image">
+		<img src={product.image} alt={`${product.brand} ${product.model}`} loading="lazy" />
+		<span class:list={['stock', product.availability === 'Disponible' && 'in-stock', product.availability === 'Por encargo' && 'on-order', product.availability === 'Agotado' && 'sold-out']}>{product.availability}</span>
+	</div>
+	<div class="catalog-card-content">
+		<p class="catalog-brand">{product.brand}</p>
+		<h2>{product.model}</h2>
+		<p class="catalog-meta">{[product.type, ...metaKeys.map((key) => product.attributes[key]).filter(Boolean)].join(' · ')}</p>
+		<div class="catalog-card-footer">
+			<p class="catalog-price">{price}</p>
+			<a class="catalog-whatsapp-cta" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label={`Consultar por ${product.brand} ${product.model} en WhatsApp`} title={`Consultar por ${product.brand} ${product.model} en WhatsApp`}><i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a>
+		</div>
+	</div>
 </article>
