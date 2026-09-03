@@ -12,6 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@phosphor-icons/web": "^2.1.2",
     "astro": "^7.2.10",
     "gsap": "^3.15.0"
   },

@@ -1,0 +1,14 @@
+---
+import CatalogPage from '../../components/catalog/CatalogPage.astro';
+import { catalogCategories, getCatalogCategory } from '../../data/catalog';
+import Layout from '../../layouts/Layout.astro';
+
+export function getStaticPaths() {
+	return catalogCategories.map((category) => ({ params: { group: category.group, category: category.slug } }));
+}
+
+const category = getCatalogCategory(Astro.params.group ?? '', Astro.params.category ?? '');
+if (!category) return new Response(null, { status: 404 });
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
+---
+<Layout title={`${category.title} | Mozart`}><CatalogPage {category} {whatsappNumber} /></Layout>

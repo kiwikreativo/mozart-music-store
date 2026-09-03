@@ -1,0 +1,6 @@
+---
+import BrandsPage from '../components/brands/BrandsPage.astro';
+import Layout from '../layouts/Layout.astro';
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
+---
+<Layout title="Marcas | Mozart"><BrandsPage {whatsappNumber} /></Layout>

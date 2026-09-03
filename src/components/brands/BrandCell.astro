@@ -1,0 +1,12 @@
+---
+import type { Brand } from '../../data/brands';
+interface Props { brand: Brand; whatsappUrl: string }
+const { brand, whatsappUrl } = Astro.props;
+const destination = brand.route ?? whatsappUrl;
+const label = brand.route ? 'Ver productos' : 'Consultar por WhatsApp';
+---
+<article class="brand-cell">
+	<h3>{brand.name}</h3>
+	<p>{brand.description}</p>
+	<a href={destination} target={brand.route ? undefined : '_blank'} rel={brand.route ? undefined : 'noreferrer'}>{label}<i class:list={['ph-bold', brand.route ? 'ph-arrow-up-right' : 'ph-whatsapp-logo']} aria-hidden="true"></i></a>
+</article>

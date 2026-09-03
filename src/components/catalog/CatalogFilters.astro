@@ -1,0 +1,15 @@
+---
+import type { CatalogFilter } from '../../data/catalog';
+interface Props { filters: CatalogFilter[]; brands: string[]; types: string[] }
+const { filters, brands, types } = Astro.props;
+const commonFilters: CatalogFilter[] = [
+	{ key: 'type', label: 'Tipo', icon: 'ph-shapes', options: types },
+	{ key: 'brand', label: 'Marca', icon: 'ph-tag', options: brands },
+	{ key: 'availability', label: 'Disponibilidad', icon: 'ph-package', options: ['Disponible', 'Por encargo', 'Agotado'] },
+	{ key: 'level', label: 'Nivel', icon: 'ph-graduation-cap', options: ['Principiante', 'Intermedio', 'Profesional'] },
+];
+---
+<aside class="catalog-filters" data-filter-panel>
+	<div class="filter-heading"><h2>Filtrar por</h2><button type="button" data-clear-filters><i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i>Limpiar filtros</button></div>
+	{[...commonFilters.slice(0, 2), { key: 'price', label: 'Rango de precio', icon: 'ph-currency-circle-dollar', options: [] }, ...commonFilters.slice(2, 3), ...filters, commonFilters[3]].map((filter) => filter.key === 'price' ? <details><summary><i class:list={['filter-icon', 'ph-bold', filter.icon]} aria-hidden="true"></i>{filter.label}<i class="filter-caret ph-bold ph-caret-down" aria-hidden="true"></i></summary><div class="filter-options price-inputs"><label>Desde<input type="number" name="minPrice" min="0" placeholder="₡0" /></label><label>Hasta<input type="number" name="maxPrice" min="0" placeholder="₡500.000" /></label></div></details> : <details><summary><i class:list={['filter-icon', 'ph-bold', filter.icon]} aria-hidden="true"></i>{filter.label}<i class="filter-caret ph-bold ph-caret-down" aria-hidden="true"></i></summary><div class="filter-options">{filter.options.map((value) => <label class="filter-option"><input type="checkbox" name={filter.key} value={value} /><span class="checkbox-ui" aria-hidden="true"><i class="ph-bold ph-check"></i></span>{value}</label>)}</div></details>)}
+</aside>

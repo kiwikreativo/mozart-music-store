@@ -5,7 +5,6 @@ import Footer from './landing/Footer.astro';
 import Hero from './landing/Hero.astro';
 import InstrumentCatalogue from './landing/InstrumentCatalogue.astro';
 import Manifesto from './landing/Manifesto.astro';
-import Navigation from './landing/Navigation.astro';
 import ProductSelection from './landing/ProductSelection.astro';
 
 const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
@@ -21,7 +20,6 @@ const products = [
 ---
 
 <main>
-	<Navigation whatsappUrl={whatsappLink('instrumentos disponibles')} />
 	<Hero />
 	<Manifesto />
 	<ProductSelection {products} {whatsappLink} />

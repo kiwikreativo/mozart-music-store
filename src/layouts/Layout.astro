@@ -1,6 +1,12 @@
 ---
+import Navbar from '../components/Navbar.astro';
+import '@phosphor-icons/web/bold';
+
 interface Props { title?: string }
 const { title = 'Mozart — Instrumentos y accesorios' } = Astro.props;
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
+const text = encodeURIComponent('Hola Mozart, quiero consultar por instrumentos disponibles.');
+const whatsappUrl = whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${text}` : `https://wa.me/?text=${text}`;
 ---
 <!doctype html>
 <html lang="es">
@@ -13,6 +19,7 @@ const { title = 'Mozart — Instrumentos y accesorios' } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body>
+		<Navbar {whatsappUrl} />
 		<slot />
 	</body>
 </html>

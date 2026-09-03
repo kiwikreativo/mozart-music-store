@@ -12,6 +12,10 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 
 Whatever action you can do yourself, please do yourself. This includes starting apps and performing verification.
 
+## Icons
+
+Use `@phosphor-icons/web` for every rendered UI icon. Do not use text-symbol or emoji substitutes for controls. Prefer the `ph-bold` weight to match the visual system, and add `aria-hidden="true"` to decorative icons when adjacent text already communicates the action.
+
 ## Project Context
 
 `mozartmusicstore` is an Astro storefront project managed with pnpm.
