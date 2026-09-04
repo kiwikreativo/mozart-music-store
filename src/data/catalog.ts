@@ -62,6 +62,11 @@ export const getCatalogCategory = (group: string, slug: string) => catalogCatego
 const imageFor = (seed: string, index: number) => `https://images.unsplash.com/photo-${['1511379938547-c1f69419868d', '1516280440614-37939bbacd81', '1493225457124-a3eb161ffa5f', '1520523839897-bd0b52f945a0'][index % 4]}?auto=format&fit=crop&w=900&q=85&sig=${seed}-${index}`;
 
 export const productsFor = (category: CatalogCategory): CatalogProduct[] => Array.from({ length: 12 }, (_, index) => {
+	if (category.group === 'instrumentos' && category.slug === 'guitarras' && index === 0) return {
+		id: 'tagima-tw61-jazz-red', brand: 'Tagima', model: 'TW-61 Jazz Red', type: 'Eléctrica', price: 120253,
+		availability: 'Disponible', level: 'Profesional', date: '2026-09-04', image: '/products/tagima-tw61-jazz-red/tagima-tw61-jazz-red-01.jpg',
+		attributes: { cuerdas: '6 cuerdas', orientacion: 'Diestro' },
+	};
 	const brand = category.brands[index % category.brands.length];
 	const type = category.types[index % category.types.length];
 	const attributes = Object.fromEntries(category.filters.map((filter, filterIndex) => [filter.key, filter.options[(index + filterIndex) % filter.options.length]]));

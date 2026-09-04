@@ -13,5 +13,5 @@ if (!detail) return new Response(null, { status: 404 });
 const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
 ---
 <Layout title={`${detail.product.brand} ${detail.product.model} | Mozart`}>
-	{detail.slug === 'acustica-serie-01' ? <ProductPage {detail} {whatsappNumber} /> : <GenericProductPage {detail} {whatsappNumber} />}
+	{detail.slug === 'tagima-tw61-jazz-red' ? <ProductPage {detail} {whatsappNumber} /> : <GenericProductPage {detail} {whatsappNumber} />}
 </Layout>
