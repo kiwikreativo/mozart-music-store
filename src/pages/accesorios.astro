@@ -1,0 +1,7 @@
+---
+import CatalogPage from '../components/catalog/CatalogPage.astro';
+import { accessoriesCategory, accessoryProducts } from '../data/catalog';
+import Layout from '../layouts/Layout.astro';
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
+---
+<Layout title="Accesorios | Mozart"><CatalogPage category={accessoriesCategory} products={accessoryProducts} {whatsappNumber} /></Layout>

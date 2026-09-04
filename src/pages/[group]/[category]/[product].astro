@@ -1,0 +1,17 @@
+---
+import ProductPage from '../../../components/product/ProductPage.astro';
+import GenericProductPage from '../../../components/product/GenericProductPage.astro';
+import { getProductDetail, productDetails } from '../../../data/productDetails';
+import Layout from '../../../layouts/Layout.astro';
+
+export function getStaticPaths() {
+	return productDetails.map((detail) => ({ params: { group: detail.group, category: detail.category, product: detail.slug } }));
+}
+
+const detail = getProductDetail(Astro.params.group ?? '', Astro.params.category ?? '', Astro.params.product ?? '');
+if (!detail) return new Response(null, { status: 404 });
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
+---
+<Layout title={`${detail.product.brand} ${detail.product.model} | Mozart`}>
+	{detail.slug === 'acustica-serie-01' ? <ProductPage {detail} {whatsappNumber} /> : <GenericProductPage {detail} {whatsappNumber} />}
+</Layout>

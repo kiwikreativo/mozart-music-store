@@ -14,6 +14,19 @@ const whatsappUrl = whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${tex
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
+		<script is:inline>
+			(() => {
+				const key = 'mozart-theme';
+				const root = document.documentElement;
+				let saved = null;
+				try { saved = localStorage.getItem(key); } catch {}
+				const theme = saved === 'light' || saved === 'dark'
+					? saved
+					: (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+				root.dataset.theme = theme;
+				root.style.colorScheme = theme;
+			})();
+		</script>
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="description" content="Instrumentos y accesorios para músicos en Alajuela, Costa Rica." />
@@ -25,14 +38,115 @@ const whatsappUrl = whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${tex
 	</body>
 </html>
 
-<style>
+<style is:global>
 
 	@import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+	:root {
+		--color-primary: #4f46e5;
+		--color-primary-hover: #4338ca;
+		--color-on-primary: #ffffff;
+		--color-bg: #f4f7fb;
+		--color-surface: #ffffff;
+		--color-surface-alt: #e9eef5;
+		--color-surface-deep: #dde5ef;
+		--color-text: #111827;
+		--color-text-muted: #5b6472;
+		--color-border: #d4dbe6;
+		--color-accent: #087f96;
+		--color-focus: #087f96;
+		--nav-bg: rgba(255, 255, 255, .82);
+		--nav-panel: rgba(255, 255, 255, .97);
+		--nav-border: rgba(71, 85, 105, .18);
+		--nav-hover: rgba(79, 70, 229, .08);
+		--nav-shadow: 0 12px 36px rgba(51, 65, 85, .14), inset 0 1px 0 rgba(255, 255, 255, .9);
+		--hero-overlay-start: #f4f7fb;
+		--hero-overlay-bottom: rgba(244, 247, 251, .52);
+		--catalog-filter-start: #ffffff;
+		--catalog-filter-end: #e9eef5;
+		--catalog-filter-border: #cbd5e1;
+		--filter-background: #ffffff;
+		--filter-surface: #f7f8fa;
+		--filter-surface-hover: #f1f3f6;
+		--filter-border: #dce2e9;
+		--filter-divider: rgba(42, 55, 72, .1);
+		--filter-text-primary: #151b26;
+		--filter-text-secondary: #566173;
+		--filter-icon: #697688;
+		--filter-icon-active: #273142;
+		--filter-accent: #0891b2;
+		--filter-accent-hover: #0e7490;
+		--filter-checkbox-border: #a8b3c2;
+		--filter-input-background: #f7f8fa;
+		--filter-input-border: #d8dee7;
+		--filter-slider-track: #d9e0e8;
+		--filter-cta-background: #111722;
+		--filter-cta-text: #ffffff;
+		--filter-cta-hover: #202938;
+		--catalog-card-start: #ffffff;
+		--catalog-card-mid: #f4ece8;
+		--catalog-card-end: #efd8cd;
+		--catalog-card-text: #2d2724;
+		--catalog-card-muted: #6f625c;
+		--catalog-card-brand: #935438;
+		--catalog-card-border: rgba(153, 87, 57, .28);
+		--catalog-card-shadow: 0 18px 42px rgba(108, 78, 63, .14);
+	}
+
+	html[data-theme='dark'] {
+		--color-bg: #030712;
+		--color-surface: #18181b;
+		--color-surface-alt: #0a101d;
+		--color-surface-deep: #07101e;
+		--color-text: #ffffff;
+		--color-text-muted: #a1a1aa;
+		--color-border: #27272a;
+		--color-accent: #06b6d4;
+		--color-focus: #06b6d4;
+		--nav-bg: rgba(3, 7, 18, .76);
+		--nav-panel: rgba(3, 7, 18, .96);
+		--nav-border: rgba(255, 255, 255, .13);
+		--nav-hover: rgba(255, 255, 255, .08);
+		--nav-shadow: 0 2px 6px rgba(0, 0, 0, .12), inset 0 1px 0 rgba(255, 255, 255, .12);
+		--hero-overlay-start: #030712;
+		--hero-overlay-bottom: rgba(3, 7, 18, .55);
+		--catalog-filter-start: #0d1524;
+		--catalog-filter-end: #07101e;
+		--catalog-filter-border: #172234;
+		--filter-background: #090f1b;
+		--filter-surface: #0d1422;
+		--filter-surface-hover: #111a2a;
+		--filter-border: rgba(130, 150, 180, .12);
+		--filter-divider: rgba(137, 156, 184, .14);
+		--filter-text-primary: #f4f6fa;
+		--filter-text-secondary: #b7beca;
+		--filter-icon: #9aa5b4;
+		--filter-icon-active: #d8dee8;
+		--filter-accent: #22d3ee;
+		--filter-accent-hover: #4adeeb;
+		--filter-checkbox-border: #607086;
+		--filter-input-background: #0d1422;
+		--filter-input-border: rgba(130, 150, 180, .16);
+		--filter-slider-track: #202c3d;
+		--filter-cta-background: #f5f6f8;
+		--filter-cta-text: #090f1b;
+		--filter-cta-hover: #e3e7ec;
+		--catalog-card-start: #302e2d;
+		--catalog-card-mid: #292625;
+		--catalog-card-end: #392721;
+		--catalog-card-text: #f5eee9;
+		--catalog-card-muted: #d2cbc7;
+		--catalog-card-brand: #e6b69f;
+		--catalog-card-border: rgba(210, 139, 104, .28);
+		--catalog-card-shadow: 0 18px 42px rgba(72, 32, 22, .24);
+	}
+
 	html,
 	body {
 		margin: 0;
 		width: 100%;
-		height: 100%;
+		min-height: 100%;
+		background: var(--color-bg);
+		color: var(--color-text);
 		/* font-family: 'Elms Sans', sans-serif; */
 	}
 </style>

@@ -1,0 +1,6 @@
+---
+import type { ProductFeature } from '../../data/productDetails';
+interface Props { features: ProductFeature[] }
+const { features } = Astro.props;
+---
+<div class="product-feature-accordion product-reveal">{features.map((feature, index) => <details open={index === 0}><summary><i class:list={['ph-bold', feature.icon]} aria-hidden="true"></i><span><strong>{feature.title}</strong><small>{feature.description}</small></span><i class="ph-bold ph-plus accordion-plus" aria-hidden="true"></i></summary><p>{feature.description}</p></details>)}</div>

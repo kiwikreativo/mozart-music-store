@@ -1,0 +1,22 @@
+---
+import type { ProductDetail } from '../../data/productDetails';
+interface Props { detail: ProductDetail; price: string; whatsappUrl: string }
+const { detail, price, whatsappUrl } = Astro.props;
+const { product } = detail;
+---
+
+<section class="product-hero product-section-frame">
+	<div data-us-project="qF3qXhdiOxdUeQYH8wCK" class="product-hero-unicorn" aria-hidden="true"></div>
+	<div class="product-hero-copy product-reveal"><p class="product-breadcrumb"><a href="/">Inicio</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i><a href="/instrumentos/guitarras">Guitarras</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i><strong>{product.model}</strong></p><p class="product-kicker">{product.brand} · {product.type}</p><h1>{product.model}</h1><p class="product-hero-tagline"><em>Tu sonido.</em> Diseñado para acompañarte.</p><p class="product-lede">{detail.description}</p><div class="product-offer"><strong>{price}</strong><span><i class="ph-bold ph-check-circle" aria-hidden="true"></i>{product.availability}</span></div><a class="product-cta" href={whatsappUrl} target="_blank" rel="noreferrer">Consultar por WhatsApp <i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a></div>
+	<figure class="product-hero-media product-reveal"><img src={detail.gallery[0].src} alt={detail.gallery[0].alt} /></figure>
+</section>
+<script is:inline>
+	(() => {
+		if (window.UnicornStudio) { window.UnicornStudio.init?.(); return; }
+		const script = document.createElement('script');
+		script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js';
+		script.async = true;
+		script.onload = () => { if (!window.UnicornStudio?.isInitialized) { window.UnicornStudio = window.UnicornStudio || {}; window.UnicornStudio.init?.(); window.UnicornStudio.isInitialized = true; } };
+		document.head.appendChild(script);
+	})();
+</script>

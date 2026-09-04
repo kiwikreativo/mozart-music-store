@@ -1,0 +1,7 @@
+---
+import type { ProductDetail } from '../../data/productDetails';
+import ProductFeatures from './ProductFeatures.astro';
+interface Props { detail: ProductDetail }
+const { detail } = Astro.props;
+---
+<section class="product-sound product-section-frame"><header class="product-section-heading product-reveal"><p class="product-kicker">Sonido en movimiento</p><h2>Un sonido que<br /><em>te acompaña.</em></h2><p>Diez segundos para conocer su claridad, construcción y respuesta.</p></header><div class="product-story-layout"><div class="product-story-sticky product-reveal"><div class="product-video"><video src={detail.video.src} poster={detail.video.poster} controls playsinline preload="metadata" data-product-video><track kind="captions" label="Español" srclang="es" src="/products/acustica-serie-01/captions.vtt" default /></video><button type="button" aria-label="Reproducir video de la Acústica Serie 01" data-video-play><i class="ph-bold ph-play" aria-hidden="true"></i></button><span>{detail.video.duration}</span></div></div><div class="product-story-copy"><ProductFeatures features={detail.features} /></div></div></section>

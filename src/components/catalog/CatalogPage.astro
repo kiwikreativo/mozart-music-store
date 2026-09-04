@@ -1,20 +1,25 @@
 ---
-import type { CatalogCategory } from '../../data/catalog';
+import type { CatalogCategory, CatalogProduct } from '../../data/catalog';
 import { productsFor } from '../../data/catalog';
 import CatalogCard from './CatalogCard.astro';
 import CatalogFilters from './CatalogFilters.astro';
-interface Props { category: CatalogCategory; whatsappNumber: string }
-const { category, whatsappNumber } = Astro.props;
-const products = productsFor(category);
+import { productDetailUrl } from '../../data/productDetails';
+interface Props { category: CatalogCategory; whatsappNumber: string; products?: CatalogProduct[] }
+const { category, whatsappNumber, products: suppliedProducts } = Astro.props;
+const products = suppliedProducts ?? productsFor(category);
+const accessoryMode = category.group === 'accesorios';
+const isBrowseAllPage = category.slug === category.group;
+const minPrice = Math.min(...products.map((product) => product.price));
+const maxPrice = Math.max(...products.map((product) => product.price));
 const whatsappLink = (product: string) => {
 	const text = encodeURIComponent(`Hola Mozart, quiero consultar por ${product}.`);
 	return whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${text}` : `https://wa.me/?text=${text}`;
 };
 ---
 <main class="catalog-page">
-	<header class="catalog-header"><p class="breadcrumb"><a href="/">Inicio</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i><a href={`/${category.group}`}>{category.group === 'audio' ? 'Audio' : 'Instrumentos'}</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i><strong>{category.title}</strong></p><h1>{category.title}</h1></header>
+	<header class="catalog-header"><p class="breadcrumb"><a href="/">Inicio</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i>{isBrowseAllPage ? <strong>{category.title}</strong> : <><a href={`/${category.group}`}>{category.group === 'audio' ? 'Audio' : 'Instrumentos'}</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i><strong>{category.title}</strong></>}</p><h1>{category.title}</h1>{accessoryMode && <p class="catalog-lede">Encuentra accesorios para complementar, proteger y mantener tus instrumentos.</p>}</header>
 	<div class="catalog-toolbar"><button class="mobile-filter-toggle" type="button" data-open-filters>Filtrar productos <i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i></button><p data-result-count>Mostrando {products.length} productos</p><label class="sort-control">Ordenar por <select data-sort><option value="relevance">Relevancia</option><option value="low">Precio: menor a mayor</option><option value="high">Precio: mayor a menor</option><option value="newest">Novedades</option></select></label></div>
-	<div class="catalog-layout"><CatalogFilters filters={category.filters} brands={category.brands} types={category.types} /><section class="catalog-results" aria-label={`Resultados de ${category.title.toLowerCase()}`}><div class="catalog-grid" data-product-grid>{products.map((product) => <CatalogCard product={product} metaKeys={category.filters.map((filter) => filter.key)} whatsappUrl={whatsappLink(`${product.brand} ${product.model}`)} />)}</div><div class="catalog-empty" data-empty-state hidden><h2>No encontramos productos con esos filtros.</h2><p>Prueba limpiando los filtros para ver toda la selección.</p><button type="button" data-clear-filters>Limpiar filtros</button></div></section></div>
+	<div class="catalog-layout"><CatalogFilters filters={category.filters} brands={category.brands} types={category.types} {minPrice} {maxPrice} {accessoryMode} /><section class="catalog-results" aria-label={`Resultados de ${category.title.toLowerCase()}`}><div class="catalog-grid" data-product-grid>{products.map((product, index) => <CatalogCard product={product} metaKeys={accessoryMode ? ['instrumento'] : category.filters.map((filter) => filter.key)} productUrl={productDetailUrl(product)} whatsappUrl={whatsappLink(`${product.brand} ${product.model}`)} useUnicorn={index < 12} />)}</div><div class="catalog-empty" data-empty-state hidden><h2>{accessoryMode ? 'No encontramos accesorios que coincidan con estos filtros.' : 'No encontramos productos con estos filtros.'}</h2><p>Prueba limpiando los filtros para ver toda la selección.</p><button type="button" data-clear-filters>Limpiar filtros</button></div></section></div>
 </main>
 
 <script>
@@ -26,21 +31,63 @@ const whatsappLink = (product: string) => {
 		const empty = page.querySelector<HTMLElement>('[data-empty-state]');
 		const grid = page.querySelector<HTMLElement>('[data-product-grid]');
 		const sort = page.querySelector<HTMLSelectElement>('[data-sort]');
+		const minInput = page.querySelector<HTMLInputElement>('input[name="minPrice"]');
+		const maxInput = page.querySelector<HTMLInputElement>('input[name="maxPrice"]');
+		const minRange = page.querySelector<HTMLInputElement>('[data-price-min]');
+		const maxRange = page.querySelector<HTMLInputElement>('[data-price-max]');
+		const apply = page.querySelector<HTMLButtonElement>('[data-apply-filters]');
 		const selected = (name: string) => [...page.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)].map((input) => input.value);
 		const update = () => {
 			const active = [...new Set([...page.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].map((input) => input.name))].map((key) => [key, selected(key)] as const);
 			const min = Number(page.querySelector<HTMLInputElement>('input[name="minPrice"]')?.value || 0);
 			const max = Number(page.querySelector<HTMLInputElement>('input[name="maxPrice"]')?.value || Number.POSITIVE_INFINITY);
-			const visible = cards.filter((card) => { const values = JSON.parse(card.dataset.filters ?? '{}') as Record<string, string>; return Number(card.dataset.price) >= min && Number(card.dataset.price) <= max && active.every(([key, options]) => options.length === 0 || options.includes(values[key] ?? '')); });
+			const visible = cards.filter((card) => { const values = JSON.parse(card.dataset.filters ?? '{}') as Record<string, string | string[]>; return Number(card.dataset.price) >= min && Number(card.dataset.price) <= max && active.every(([key, options]) => { const value = values[key]; return options.length === 0 || (Array.isArray(value) ? value.some((item) => options.includes(item)) : options.includes(value ?? '')); }); });
 			cards.forEach((card) => card.hidden = !visible.includes(card));
 			visible.sort((a, b) => sort?.value === 'low' ? Number(a.dataset.price) - Number(b.dataset.price) : sort?.value === 'high' ? Number(b.dataset.price) - Number(a.dataset.price) : sort?.value === 'newest' ? String(b.dataset.date).localeCompare(String(a.dataset.date)) : 0).forEach((card) => grid?.append(card));
 			if (count) count.textContent = `Mostrando ${visible.length} ${visible.length === 1 ? 'producto' : 'productos'}`;
+			if (apply) apply.textContent = `Ver ${visible.length} ${visible.length === 1 ? 'producto' : 'productos'}`;
 			if (empty) empty.hidden = visible.length !== 0;
 		};
+		const syncPrice = (source: 'min' | 'max') => {
+			if (!minInput || !maxInput || !minRange || !maxRange) return;
+			let min = Number(minInput.value || minRange.min);
+			let max = Number(maxInput.value || maxRange.max);
+			if (source === 'min' && min > max) max = min;
+			if (source === 'max' && max < min) min = max;
+			minInput.value = String(min); maxInput.value = String(max); minRange.value = String(min); maxRange.value = String(max);
+			update();
+		};
 		page.querySelectorAll<HTMLInputElement>('input').forEach((input) => input.addEventListener('input', update));
+		minInput?.addEventListener('input', () => syncPrice('min'));
+		maxInput?.addEventListener('input', () => syncPrice('max'));
+		minRange?.addEventListener('input', () => { if (minInput) minInput.value = minRange.value; syncPrice('min'); });
+		maxRange?.addEventListener('input', () => { if (maxInput) maxInput.value = maxRange.value; syncPrice('max'); });
 		sort?.addEventListener('change', update);
-		page.querySelectorAll<HTMLButtonElement>('[data-clear-filters]').forEach((button) => button.addEventListener('click', () => { page.querySelectorAll<HTMLInputElement>('input').forEach((input) => { input.checked = false; input.value = ''; }); if (sort) sort.value = 'relevance'; update(); }));
-		page.querySelector<HTMLButtonElement>('[data-open-filters]')?.addEventListener('click', () => panel?.classList.toggle('is-open'));
+		page.querySelectorAll<HTMLButtonElement>('[data-clear-filters]').forEach((button) => button.addEventListener('click', () => { page.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((input) => input.checked = false); if (minInput) minInput.value = minInput.min; if (maxInput) maxInput.value = maxInput.max; if (minRange) minRange.value = minRange.min; if (maxRange) maxRange.value = maxRange.max; if (sort) sort.value = 'relevance'; update(); }));
+		page.querySelectorAll<HTMLButtonElement>('[data-filter-accordion]').forEach((button) => button.addEventListener('click', () => { const content = document.getElementById(button.getAttribute('aria-controls') ?? ''); const expanded = button.getAttribute('aria-expanded') === 'true'; button.setAttribute('aria-expanded', String(!expanded)); if (content) content.hidden = expanded; }));
+		page.querySelector<HTMLButtonElement>('[data-open-filters]')?.addEventListener('click', () => panel?.classList.add('is-open'));
+		page.querySelector<HTMLButtonElement>('[data-close-filters]')?.addEventListener('click', () => panel?.classList.remove('is-open'));
+		apply?.addEventListener('click', () => { update(); panel?.classList.remove('is-open'); });
+		const unicornHosts = [...page.querySelectorAll<HTMLElement>('[data-unicorn-card]')];
+		if (unicornHosts.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			const unicornWindow = window as Window & typeof globalThis & { UnicornStudio?: { init?: () => void; isInitialized?: boolean } };
+			const initializeUnicorn = () => {
+				if (unicornWindow.UnicornStudio?.init && !unicornWindow.UnicornStudio.isInitialized) {
+					unicornWindow.UnicornStudio.init();
+					unicornWindow.UnicornStudio.isInitialized = true;
+				}
+			};
+			if (unicornWindow.UnicornStudio?.init) initializeUnicorn();
+			else if (!document.querySelector('script[data-unicorn-studio]')) {
+				const script = document.createElement('script');
+				script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js';
+				script.async = true;
+				script.dataset.unicornStudio = 'true';
+				script.onload = initializeUnicorn;
+				document.head.append(script);
+			}
+		}
+		update();
 	}
 </script>
 
@@ -56,6 +103,12 @@ const whatsappLink = (product: string) => {
 		box-shadow:inset 0 1px 0 rgba(255,244,235,.1),0 18px 42px rgba(72,32,22,.24);
 		transition:transform .28s cubic-bezier(.16,1,.3,1),border-color .28s ease,box-shadow .28s ease;
 	}
+	.catalog-card{position:relative}
+	.catalog-card-link{position:absolute;inset:0;z-index:1;border-radius:16px}
+	.catalog-card-link:focus-visible{outline:3px solid #06b6d4;outline-offset:5px}
+	.catalog-image,.catalog-card-content{position:relative;z-index:0;pointer-events:none}
+	.catalog-card-content .catalog-whatsapp-cta{position:relative;z-index:2;pointer-events:auto}
+	.catalog-card:hover h2{color:#f1c8b3}
 	.catalog-card:hover{border-color:rgba(220,144,105,.58);box-shadow:inset 0 1px 0 rgba(255,244,235,.14),0 24px 52px rgba(91,40,26,.3)}
 	.catalog-image{height:280px;margin:10px 10px 0;border:1px solid rgba(255,244,235,.14);border-radius:12px;background:#d4cec6}
 	.catalog-image img{filter:contrast(1.04) saturate(.88)}
@@ -67,6 +120,7 @@ const whatsappLink = (product: string) => {
 	.stock.on-order{color:#edc79f}
 	.stock.sold-out{color:#bdb5b1}
 	.catalog-card h2{font-size:1.45rem;line-height:1.05}
+	.catalog-detail-link{color:inherit;text-decoration:none}.catalog-detail-link:hover{color:#e3a080}.catalog-detail-link:focus-visible{outline:2px solid var(--color-focus);outline-offset:4px}
 	.catalog-meta{min-height:0;margin:9px 0 18px;color:#d2cbc7}
 	.catalog-card-footer{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:auto}
 	.catalog-price{margin:0;color:#f5eee9;font-size:clamp(1.4rem,2vw,1.85rem);line-height:1;font-weight:700}
@@ -78,4 +132,41 @@ const whatsappLink = (product: string) => {
 	.catalog-card-content .catalog-whatsapp-cta:active{transform:scale(.98)}
 	@media(max-width:760px){.catalog-image{height:330px}.catalog-card-content{min-height:178px}}
 	@media(prefers-reduced-motion:reduce){.catalog-card,.catalog-image img,.catalog-whatsapp-cta{transition:none!important}.catalog-card:hover,.catalog-card:hover .catalog-image img,.catalog-card-content .catalog-whatsapp-cta:hover{transform:none}}
+
+	html[data-theme='light'] .catalog-page{background:var(--color-bg);color:var(--color-text)}
+	html[data-theme='light'] .breadcrumb,html[data-theme='light'] .breadcrumb a,html[data-theme='light'] .catalog-toolbar p,html[data-theme='light'] .sort-control,html[data-theme='light'] .catalog-empty p{color:var(--color-text-muted)}
+	html[data-theme='light'] .breadcrumb strong,html[data-theme='light'] .filter-heading button,html[data-theme='light'] .catalog-empty button{color:var(--color-accent)}
+	html[data-theme='light'] .sort-control select{color:var(--color-text);background:var(--color-surface);border-color:var(--color-border)}
+	html[data-theme='light'] .catalog-filters{background:linear-gradient(145deg,var(--catalog-filter-start),var(--catalog-filter-end));border-color:var(--catalog-filter-border)}
+	html[data-theme='light'] .catalog-filters details{background:rgba(255,255,255,.58);border-color:var(--catalog-filter-border)}
+	html[data-theme='light'] .catalog-filters summary{color:var(--color-text)}
+	html[data-theme='light'] .filter-caret,html[data-theme='light'] .catalog-filters label{color:var(--color-text-muted)}
+	html[data-theme='light'] .filter-icon{color:#526174}
+	html[data-theme='light'] .filter-options{border-color:var(--color-border)}
+	html[data-theme='light'] .checkbox-ui{color:#fff;background:var(--color-surface);border-color:#8793a4}
+	html[data-theme='light'] .price-inputs input{color:var(--color-text);background:var(--color-surface);border-color:var(--color-border)}
+	html[data-theme='light'] .mobile-filter-toggle{color:var(--color-text);background:var(--color-surface);border-color:var(--color-border)}
+	html[data-theme='light'] .catalog-empty{border-color:var(--color-border)}
+	html[data-theme='light'] .catalog-card{color:var(--catalog-card-text);background:radial-gradient(circle at 96% 108%,rgba(191,112,78,.22),transparent 48%),linear-gradient(155deg,var(--catalog-card-start) 0%,var(--catalog-card-mid) 54%,var(--catalog-card-end) 100%);border-color:var(--catalog-card-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.8),var(--catalog-card-shadow)}
+	html[data-theme='light'] .catalog-card:hover{border-color:rgba(153,87,57,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 24px 52px rgba(108,78,63,.2)}
+	html[data-theme='light'] .catalog-image{background:#e8e2dc;border-color:rgba(123,91,75,.18)}
+	html[data-theme='light'] .catalog-brand{color:var(--catalog-card-brand)}
+	html[data-theme='light'] .catalog-meta{color:var(--catalog-card-muted)}
+	html[data-theme='light'] .catalog-price{color:var(--catalog-card-text)}
+	html[data-theme='light'] .stock{color:#4f4743;background:rgba(255,255,255,.88);border-color:rgba(105,84,74,.24)}
+	html[data-theme='light'] .stock.in-stock{color:#25613a;background:rgba(239,250,242,.92);border-color:rgba(37,97,58,.28)}
+	html[data-theme='light'] .stock.on-order{color:#855027}
+	html[data-theme='light'] .stock.sold-out{color:#6b7280}
+
+	/* Unified catalog filter — shared by every category listing. */
+	.catalog-layout{grid-template-columns:336px minmax(0,1fr);gap:36px}
+	.catalog-filters{box-sizing:border-box;position:sticky;top:88px;max-height:calc(100vh - 112px);overflow:auto;padding:24px;background:var(--filter-background);border:1px solid var(--filter-border);border-radius:26px;color:var(--filter-text-primary);box-shadow:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+	.filter-heading{gap:10px;margin:0 0 18px}.filter-heading h2{font:700 1.2rem/1 'Geist',sans-serif;color:var(--filter-text-primary)}.filter-heading > button{min-height:36px;padding:8px;color:var(--filter-accent);font:600 .78rem/1 'Geist',sans-serif}.filter-heading > button:first-of-type{margin-left:auto}.filter-heading > button:hover{color:var(--filter-accent-hover);text-decoration:underline}.filter-close{display:none!important}
+	.filter-sections{border-top:1px solid var(--filter-divider)}.filter-section{border-bottom:1px solid var(--filter-divider)}.filter-trigger{display:flex;width:100%;min-height:56px;align-items:center;justify-content:space-between;padding:0 2px;color:var(--filter-text-primary);background:transparent;border:0;font:600 .88rem/1 'Geist',sans-serif;text-align:left;cursor:pointer;transition:color .18s ease,background-color .18s ease}.filter-trigger:hover{background:var(--filter-surface-hover)}.filter-trigger>span{display:inline-flex;align-items:center;gap:10px}.filter-icon{width:20px;color:var(--filter-icon);font-size:1.05rem}.filter-trigger[aria-expanded='true'] .filter-icon{color:var(--filter-icon-active)}.filter-caret{color:var(--filter-icon);font-size:1.05rem;transition:transform .18s ease,color .18s ease}.filter-trigger[aria-expanded='true'] .filter-caret{color:var(--filter-icon-active);transform:rotate(180deg)}
+	.filter-options{padding:2px 2px 18px;border:0}.filter-options[hidden]{display:none}.catalog-filters label.filter-option{position:relative;display:flex;min-height:36px;align-items:center;gap:10px;margin:0;color:var(--filter-text-secondary);font:.86rem/1.25 'Geist',sans-serif}.filter-option input[type='checkbox']{position:absolute;inline-size:1px;block-size:1px;opacity:0}.checkbox-ui{width:18px;height:18px;flex:0 0 18px;color:var(--filter-cta-text);background:transparent;border-color:var(--filter-checkbox-border);border-radius:5px}.filter-option:hover .checkbox-ui{border-color:var(--filter-accent)}.filter-option:has(input:checked) .checkbox-ui{background:var(--filter-accent);border-color:var(--filter-accent)}.filter-option:has(input:focus-visible) .checkbox-ui{outline-color:var(--filter-accent)}
+	.price-filter{padding-top:4px}.price-inputs{gap:12px}.price-inputs label{margin:0;color:var(--filter-text-secondary);font:600 .72rem/1 'Geist',sans-serif}.price-inputs input{box-sizing:border-box;height:42px;margin:7px 0 4px;padding:0 10px;color:var(--filter-text-primary);background:var(--filter-input-background);border-color:var(--filter-input-border);border-radius:10px;font:600 .85rem/1 'Geist',sans-serif}.price-inputs span{display:block;overflow:hidden;color:var(--filter-text-secondary);font:500 .68rem/1.2 'Geist',sans-serif;text-overflow:ellipsis;white-space:nowrap}.price-inputs input:focus-visible,.price-sliders input:focus-visible{outline:2px solid var(--filter-accent);outline-offset:2px}.price-sliders{position:relative;height:28px;margin-top:14px}.price-sliders::before{position:absolute;inset:12px 0 auto;height:4px;background:var(--filter-slider-track);border-radius:999px;content:''}.price-sliders input{position:absolute;inset:0;width:100%;height:28px;margin:0;appearance:none;background:transparent;pointer-events:none}.price-sliders input::-webkit-slider-thumb{width:17px;height:17px;appearance:none;background:var(--filter-accent);border:2px solid var(--filter-background);border-radius:50%;box-shadow:0 0 0 1px var(--filter-accent);cursor:pointer;pointer-events:auto}.price-sliders input::-moz-range-thumb{width:14px;height:14px;background:var(--filter-accent);border:2px solid var(--filter-background);border-radius:50%;box-shadow:0 0 0 1px var(--filter-accent);cursor:pointer;pointer-events:auto}
+	.filter-footer{padding-top:24px}.filter-results{width:100%;min-height:56px;padding:0 18px;color:var(--filter-cta-text);background:var(--filter-cta-background);border:0;border-radius:999px;font:700 .96rem/1 'Geist',sans-serif;cursor:pointer;transition:background-color .18s ease,transform .18s ease}.filter-results:hover{background:var(--filter-cta-hover)}.filter-results:active{transform:scale(.99)}.filter-results:focus-visible{outline:2px solid var(--filter-accent);outline-offset:3px}
+	@media(max-width:760px){.catalog-layout{display:block}.catalog-filters{position:fixed;z-index:20;top:0;right:0;display:flex;width:min(92vw,380px);max-height:none;height:100dvh;margin:0;padding:24px;flex-direction:column;border-radius:26px 0 0 26px;box-shadow:-20px 0 60px rgba(3,7,18,.22);transform:translateX(105%);transition:transform .24s cubic-bezier(.16,1,.3,1),background-color .18s ease,border-color .18s ease}.catalog-filters.is-open{transform:translateX(0)}.filter-heading{margin-bottom:18px}.filter-close{display:grid!important;width:36px;place-items:center;color:var(--filter-text-primary)!important;font-size:1.1rem}.filter-sections{overflow:auto;padding-right:2px}.filter-footer{margin-top:auto;padding-top:18px;background:var(--filter-background)}.mobile-filter-toggle{color:var(--filter-text-primary);background:var(--filter-background);border-color:var(--filter-border)}}
+	@media(max-width:760px){.catalog-filters{z-index:200}}
+	@media(prefers-reduced-motion:reduce){.catalog-filters,.filter-trigger,.filter-caret,.filter-results{transition:none!important}}
 </style>

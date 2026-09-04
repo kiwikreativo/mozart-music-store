@@ -12,25 +12,33 @@ const audio = catalogCategories.filter((category) => category.group === 'audio')
 		<a class="navbar-brand" href="/" aria-label="Mozart inicio">MOZART<span>®</span></a>
 		<nav class="navbar-links" aria-label="Navegación principal">
 			<div class="navbar-menu">
-				<button class="navbar-trigger" type="button" aria-expanded="false" aria-controls="menu-instrumentos" data-menu-trigger="instrumentos">Instrumentos <i class="ph-bold ph-caret-down" aria-hidden="true"></i></button>
+				<a class="navbar-link" href="/instrumentos">Instrumentos</a><button class="navbar-trigger" type="button" aria-label="Abrir categorías de Instrumentos" aria-expanded="false" aria-controls="menu-instrumentos" data-menu-trigger="instrumentos"><i class="ph-bold ph-caret-down" aria-hidden="true"></i></button>
 				<div id="menu-instrumentos" class="navbar-dropdown" data-menu="instrumentos" hidden>
 					{instruments.map((item) => <a href={`/${item.group}/${item.slug}`}>{item.title}</a>)}
 				</div>
 			</div>
 			<div class="navbar-menu">
-				<button class="navbar-trigger" type="button" aria-expanded="false" aria-controls="menu-audio" data-menu-trigger="audio">Audio <i class="ph-bold ph-caret-down" aria-hidden="true"></i></button>
+				<a class="navbar-link" href="/audio">Audio</a><button class="navbar-trigger" type="button" aria-label="Abrir categorías de Audio" aria-expanded="false" aria-controls="menu-audio" data-menu-trigger="audio"><i class="ph-bold ph-caret-down" aria-hidden="true"></i></button>
 				<div id="menu-audio" class="navbar-dropdown" data-menu="audio" hidden>
 					{audio.map((item) => <a href={`/${item.group}/${item.slug}`}>{item.title}</a>)}
 				</div>
 			</div>
+			<a class="navbar-link" href="/accesorios">Accesorios</a>
 			<a class="navbar-link" href="/marcas">Marcas</a>
 		</nav>
-		<a class="navbar-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp <i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a>
-		<button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="navbar-mobile-menu" aria-label="Abrir menú" data-mobile-toggle><i class="ph-bold ph-list" aria-hidden="true"></i></button>
+		<div class="navbar-actions">
+			<div class="theme-switch" role="group" aria-label="Seleccionar tema">
+				<button type="button" aria-label="Usar tema claro" title="Tema claro" aria-pressed="false" data-theme-choice="light"><i class="ph-bold ph-sun" aria-hidden="true"></i></button>
+				<button type="button" aria-label="Usar tema oscuro" title="Tema oscuro" aria-pressed="false" data-theme-choice="dark"><i class="ph-bold ph-moon" aria-hidden="true"></i></button>
+			</div>
+			<a class="navbar-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp <i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a>
+			<button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="navbar-mobile-menu" aria-label="Abrir menú" data-mobile-toggle><i class="ph-bold ph-list" aria-hidden="true"></i></button>
+		</div>
 	</div>
 	<div id="navbar-mobile-menu" class="navbar-mobile" hidden data-mobile-menu>
-		<div class="mobile-group"><button type="button" aria-expanded="false" data-mobile-submenu="instrumentos">Instrumentos <i class="ph-bold ph-caret-down" aria-hidden="true"></i></button><div data-mobile-panel="instrumentos" hidden>{instruments.map((item) => <a href={`/${item.group}/${item.slug}`}>{item.title}</a>)}</div></div>
-		<div class="mobile-group"><button type="button" aria-expanded="false" data-mobile-submenu="audio">Audio <i class="ph-bold ph-caret-down" aria-hidden="true"></i></button><div data-mobile-panel="audio" hidden>{audio.map((item) => <a href={`/${item.group}/${item.slug}`}>{item.title}</a>)}</div></div>
+		<div class="mobile-group"><div class="mobile-parent"><a href="/instrumentos">Instrumentos</a><button type="button" aria-label="Abrir categorías de Instrumentos" aria-expanded="false" data-mobile-submenu="instrumentos"><i class="ph-bold ph-caret-down" aria-hidden="true"></i></button></div><div data-mobile-panel="instrumentos" hidden>{instruments.map((item) => <a href={`/${item.group}/${item.slug}`}>{item.title}</a>)}</div></div>
+		<div class="mobile-group"><div class="mobile-parent"><a href="/audio">Audio</a><button type="button" aria-label="Abrir categorías de Audio" aria-expanded="false" data-mobile-submenu="audio"><i class="ph-bold ph-caret-down" aria-hidden="true"></i></button></div><div data-mobile-panel="audio" hidden>{audio.map((item) => <a href={`/${item.group}/${item.slug}`}>{item.title}</a>)}</div></div>
+		<a href="/accesorios">Accesorios</a>
 		<a href="/marcas">Marcas</a>
 		<a class="mobile-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">Contactar por WhatsApp <i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a>
 	</div>
@@ -39,6 +47,23 @@ const audio = catalogCategories.filter((category) => category.group === 'audio')
 <script>
 	const navbar = document.querySelector<HTMLElement>('[data-navbar]');
 	if (navbar) {
+		const themeKey = 'mozart-theme';
+		const themeButtons = navbar.querySelectorAll<HTMLButtonElement>('[data-theme-choice]');
+		const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+		const updateThemeControls = (theme: 'light' | 'dark') => themeButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.themeChoice === theme)));
+		const applyTheme = (theme: 'light' | 'dark', persist = false) => {
+			document.documentElement.dataset.theme = theme;
+			document.documentElement.style.colorScheme = theme;
+			updateThemeControls(theme);
+			if (persist) { try { localStorage.setItem(themeKey, theme); } catch {} }
+		};
+		updateThemeControls(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+		themeButtons.forEach((button) => button.addEventListener('click', () => applyTheme(button.dataset.themeChoice === 'light' ? 'light' : 'dark', true)));
+		systemTheme.addEventListener('change', (event) => {
+			let hasSavedTheme = false;
+			try { hasSavedTheme = localStorage.getItem(themeKey) === 'light' || localStorage.getItem(themeKey) === 'dark'; } catch {}
+			if (!hasSavedTheme) applyTheme(event.matches ? 'dark' : 'light');
+		});
 		const closeDesktopMenus = () => navbar.querySelectorAll<HTMLElement>('[data-menu]').forEach((menu) => {
 			menu.hidden = true;
 			const trigger = navbar.querySelector<HTMLButtonElement>(`[data-menu-trigger="${menu.dataset.menu}"]`);
@@ -63,12 +88,19 @@ const audio = catalogCategories.filter((category) => category.group === 'audio')
 </script>
 
 <style>
-	.navbar { position: sticky; top: 12px; z-index: 50; width: min(1120px, calc(100% - 24px)); margin: 0 auto -80px; color: #fff; font-family: 'Geist', sans-serif; }
-	.navbar-shell { min-height: 56px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 8px 10px 8px 18px; background: rgba(3, 7, 18, .76); border: 1px solid rgba(255, 255, 255, .13); border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.12); backdrop-filter: blur(20px); }
-	.navbar-brand { color: #fff; font-size: 1.05rem; font-weight: 700; letter-spacing: -.08em; text-decoration: none; }.navbar-brand span { font-size: .42em; vertical-align: top; margin-left: .08rem; }
-	.navbar-links { display: flex; align-items: center; gap: 26px; }.navbar-menu { position: relative; }.navbar-trigger,.navbar-link { border: 0; padding: 8px 0; color: #d4d4d8; background: transparent; font: 500 .83rem/1 'Geist', sans-serif; text-decoration: none; cursor: pointer; transition: color .2s ease; }.navbar-trigger:hover,.navbar-link:hover { color: #fff; }.navbar-trigger i { display: inline-block; margin-left: 5px; transition: transform .2s ease; }.navbar-trigger[aria-expanded="true"] i { transform: rotate(180deg); }
-	.navbar-dropdown { position: absolute; top: calc(100% + 16px); left: 50%; width: max-content; min-width: 242px; max-height: min(70vh, 530px); overflow-y: auto; padding: 12px 0; background: rgba(3,7,18,.96); border: 1px solid rgba(255,255,255,.14); border-radius: 10px; box-shadow: 0 18px 45px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter: blur(20px); transform: translateX(-50%); }.navbar-dropdown a { display: block; padding: 9px 18px; color: #e4e4e7; font-size: .9rem; text-decoration: none; transition:color .2s ease,background .2s ease; }.navbar-dropdown a:hover { color:#fff; background: rgba(255,255,255,.08); }
-	.navbar-whatsapp { justify-self: end; display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; color: #fff; background: linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; box-shadow: inset 1px 1px 1px rgba(255,255,255,.2), 0 4px 14px rgba(0,0,0,.16); font-size: .8rem; font-weight: 600; text-decoration: none; transition: transform .2s ease, background .2s ease; }.navbar-whatsapp:hover { transform: translateY(-2px); background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.08)); }.navbar-whatsapp:active { transform: scale(.98); }
-	.navbar-toggle,.navbar-mobile { display: none; }.navbar a:focus-visible,.navbar button:focus-visible { outline: 2px solid #06b6d4; outline-offset: 3px; }
-	@media (max-width: 760px) { .navbar { width: calc(100% - 20px); top: 10px; margin-bottom: -66px; }.navbar-shell { grid-template-columns: 1fr auto; min-height: 52px; }.navbar-links,.navbar-whatsapp { display: none; }.navbar-toggle { display: grid; width: 36px; height: 36px; place-content: center; color: #fff; border: 0; border-radius: 999px; background: rgba(255,255,255,.08); cursor: pointer; }.navbar-toggle i { font-size: 1.15rem; }.navbar-mobile { display: grid; gap: 2px; margin-top: 8px; padding: 10px; background: rgba(3,7,18,.94); border: 1px solid rgba(255,255,255,.13); border-radius: 16px; box-shadow: 0 18px 45px rgba(0,0,0,.28); backdrop-filter: blur(20px); }.navbar-mobile > a,.mobile-group > button,.mobile-group > div a { display: flex; justify-content: space-between; width: 100%; padding: 12px 10px; color: #fff; border: 0; background: transparent; font: 500 .95rem/1.2 'Geist',sans-serif; text-align: left; text-decoration: none; }.mobile-group > button { cursor: pointer; }.mobile-group > button i { transition: transform .2s ease; }.mobile-group > button[aria-expanded="true"] i { transform: rotate(180deg); }.mobile-group > div { padding: 0 6px 6px; }.mobile-group > div a { color: #a1a1aa; font-size: .87rem; }.mobile-whatsapp { margin-top: 6px; background: #4f46e5; border-radius: 10px; }.navbar-mobile[hidden] { display: none; } }
+	.navbar { position: sticky; top: 12px; z-index: 50; width: min(1120px, calc(100% - 24px)); margin: 0 auto -80px; color: var(--color-text); font-family: 'Geist', sans-serif; }
+	.navbar-shell { min-height: 56px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 8px 10px 8px 18px; background: var(--nav-bg); border: 1px solid var(--nav-border); border-radius: 999px; box-shadow: var(--nav-shadow); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+	.navbar-brand { color: var(--color-text); font-size: 1.05rem; font-weight: 700; letter-spacing: -.08em; text-decoration: none; }.navbar-brand span { font-size: .42em; vertical-align: top; margin-left: .08rem; }
+	.navbar-links { display: flex; align-items: center; gap: 26px; }.navbar-menu { position: relative; display:flex; align-items:center; gap:5px; }.navbar-trigger,.navbar-link { border: 0; padding: 8px 0; color: var(--color-text-muted); background: transparent; font: 500 .83rem/1 'Geist', sans-serif; text-decoration: none; cursor: pointer; transition: color .2s ease; }.navbar-trigger{display:grid;width:20px;height:30px;place-items:center;padding:0}.navbar-trigger:hover,.navbar-link:hover { color: var(--color-text); }.navbar-trigger i { display: inline-block; transition: transform .2s ease; }.navbar-trigger[aria-expanded="true"] i { transform: rotate(180deg); }
+	.navbar-dropdown { position: absolute; top: calc(100% + 16px); left: 50%; width: max-content; min-width: 242px; max-height: min(70vh, 530px); overflow-y: auto; padding: 12px 0; background: var(--nav-panel); border: 1px solid var(--nav-border); border-radius: 10px; box-shadow: var(--nav-shadow); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transform: translateX(-50%); }.navbar-dropdown a { display: block; padding: 9px 18px; color: var(--color-text); font-size: .9rem; text-decoration: none; transition:color .2s ease,background .2s ease; }.navbar-dropdown a:hover { color:var(--color-text); background: var(--nav-hover); }
+	.navbar-actions { justify-self: end; display: flex; align-items: center; gap: 8px; }
+	.theme-switch { display: inline-grid; grid-template-columns: repeat(2, 32px); gap: 2px; padding: 3px; color: var(--color-text-muted); background: color-mix(in srgb, var(--color-surface) 72%, transparent); border: 1px solid var(--nav-border); border-radius: 14px; }
+	.theme-switch button { display: grid; width: 32px; height: 32px; place-items: center; padding: 0; color: inherit; background: transparent; border: 0; border-radius: 10px; cursor: pointer; transition: color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease; }
+	.theme-switch button[aria-pressed="true"] { color: var(--color-text); background: var(--color-surface); box-shadow: 0 3px 10px rgba(51, 65, 85, .16), inset 0 1px 0 rgba(255, 255, 255, .45); }
+	.theme-switch button:hover { color: var(--color-text); }.theme-switch button:active { transform: scale(.94); }.theme-switch i { font-size: 1.05rem; }
+	.navbar-whatsapp { justify-self: end; display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; color: var(--color-text); background: linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.05)); border: 1px solid var(--nav-border); border-radius: 999px; box-shadow: inset 1px 1px 1px rgba(255,255,255,.2), 0 4px 14px rgba(0,0,0,.16); font-size: .8rem; font-weight: 600; text-decoration: none; transition: transform .2s ease, background .2s ease; }.navbar-whatsapp:hover { transform: translateY(-2px); background: var(--nav-hover); }.navbar-whatsapp:active { transform: scale(.98); }
+	.navbar-toggle,.navbar-mobile { display: none; }.navbar a:focus-visible,.navbar button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+	@media (max-width: 760px) { .navbar { width: calc(100% - 20px); top: 10px; margin-bottom: -66px; }.navbar-shell { grid-template-columns: 1fr auto; min-height: 52px; }.navbar-links,.navbar-whatsapp { display: none; }.theme-switch { grid-template-columns: repeat(2, 29px); }.theme-switch button { width: 29px; height: 29px; }.navbar-toggle { display: grid; width: 36px; height: 36px; place-content: center; color: var(--color-text); border: 0; border-radius: 999px; background: var(--nav-hover); cursor: pointer; }.navbar-toggle i { font-size: 1.15rem; }.navbar-mobile { display: grid; gap: 2px; margin-top: 8px; padding: 10px; background: var(--nav-panel); border: 1px solid var(--nav-border); border-radius: 16px; box-shadow: var(--nav-shadow); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }.navbar-mobile > a,.mobile-parent > a,.mobile-group > div a { display: flex; justify-content: space-between; width: 100%; padding: 12px 10px; color: var(--color-text); border: 0; background: transparent; font: 500 .95rem/1.2 'Geist',sans-serif; text-align: left; text-decoration: none; }.mobile-parent{display:flex;align-items:center}.mobile-parent > button{display:grid;width:40px;height:40px;place-items:center;color:var(--color-text);border:0;background:transparent;cursor:pointer}.mobile-parent > button i { transition: transform .2s ease; }.mobile-parent > button[aria-expanded="true"] i { transform: rotate(180deg); }.mobile-group > div:not(.mobile-parent) { padding: 0 6px 6px; }.mobile-group > div a { color: var(--color-text-muted); font-size: .87rem; }.navbar-mobile > .mobile-whatsapp { justify-content:space-between; margin-top: 6px; color: var(--color-on-primary); background: var(--color-primary); border-radius: 10px; }.navbar-mobile[hidden] { display: none; } }
+	@media (prefers-reduced-transparency: reduce) { .navbar-shell,.navbar-dropdown,.navbar-mobile { background: var(--color-surface); backdrop-filter: none; -webkit-backdrop-filter: none; } }
+	@media (prefers-reduced-motion: reduce) { .theme-switch button { transition: none; }.theme-switch button:active { transform: none; } }
 </style>

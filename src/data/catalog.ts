@@ -1,4 +1,4 @@
-export type CatalogGroup = 'instrumentos' | 'audio';
+export type CatalogGroup = 'instrumentos' | 'audio' | 'accesorios';
 
 export type CatalogFilter = {
 	key: string;
@@ -17,7 +17,7 @@ export type CatalogProduct = {
 	level: 'Principiante' | 'Intermedio' | 'Profesional';
 	date: string;
 	image: string;
-	attributes: Record<string, string>;
+	attributes: Record<string, string | string[]>;
 };
 
 export type CatalogCategory = {
@@ -78,3 +78,65 @@ export const productsFor = (category: CatalogCategory): CatalogProduct[] => Arra
 		attributes,
 	};
 });
+
+export const accessoriesCategory: CatalogCategory = {
+	group: 'accesorios', slug: 'accesorios', title: 'Accesorios',
+	brands: ['Yamaha', 'Ibanez', 'Cort', 'Squier', 'Meinl', 'Shure', 'Roland', 'D’Addario'],
+	types: [],
+	filters: [
+		{ key: 'instrumento', label: 'Instrumento', icon: 'ph-guitar', options: [] },
+		{ key: 'tipoAccesorio', label: 'Tipo de accesorio', icon: 'ph-toolbox', options: [] },
+	],
+	basePrice: 2500, imageSeed: 'accessories',
+};
+
+const accessorySeed = [
+	['Cuerdas acústicas 11–52', 'Cuerdas', 'D’Addario', 7500, 'Disponible', ['Guitarra']],
+	['Cuerdas eléctricas 10–46', 'Cuerdas', 'Ernie Ball', 8500, 'Disponible', ['Guitarra']],
+	['Faja de algodón tejida', 'Fajas', 'Yamaha', 12000, 'Disponible', ['Guitarra', 'Bajo']],
+	['Afinador cromático compacto', 'Afinadores', 'Ibanez', 18500, 'Por encargo', ['Guitarra', 'Bajo', 'Ukelele', 'Violín']],
+	['Capo de aluminio', 'Capos', 'Cort', 9500, 'Disponible', ['Guitarra', 'Ukelele']],
+	['Púas celuloide surtidas', 'Púas', 'Squier', 2500, 'Disponible', ['Guitarra', 'Bajo']],
+	['Cable de instrumento 1/4”', 'Cables', 'Yamaha', 14500, 'Disponible', ['Guitarra', 'Bajo', 'Teclado']],
+	['Funda acolchada deluxe', 'Fundas', 'Cort', 38000, 'Por encargo', ['Guitarra']],
+	['Cuerdas nickel para bajo', 'Cuerdas', 'D’Addario', 19500, 'Disponible', ['Bajo']],
+	['Pedal sustain universal', 'Pedales', 'Roland', 25000, 'Disponible', ['Teclado', 'Piano digital']],
+	['Soporte X para teclado', 'Soportes', 'Yamaha', 55000, 'Disponible', ['Teclado', 'Piano digital']],
+	['Cable MIDI de 3 metros', 'Cables', 'Roland', 12000, 'Agotado', ['Teclado', 'Piano digital']],
+	['Baquetas 5A hickory', 'Baquetas', 'Meinl', 7500, 'Disponible', ['Batería', 'Percusión']],
+	['Parche coated 14 pulgadas', 'Parches', 'Yamaha', 18000, 'Por encargo', ['Batería']],
+	['Cable XLR profesional', 'Cables', 'Shure', 14500, 'Disponible', ['Micrófono', 'Audio']],
+	['Brazo de micrófono articulado', 'Brazos de micrófono', 'Shure', 42000, 'Disponible', ['Micrófono', 'Audio']],
+	['Antipop de malla doble', 'Antipop', 'Shure', 12000, 'Disponible', ['Micrófono']],
+	['Cuerdas para violín 4/4', 'Cuerdas', 'D’Addario', 22000, 'Por encargo', ['Violín']],
+	['Resina clara para arco', 'Resinas', 'Yamaha', 4900, 'Disponible', ['Violín']],
+	['Cañas para saxofón alto', 'Cañas', 'Yamaha', 9000, 'Agotado', ['Saxofón']],
+] as const;
+
+export const accessoryProducts: CatalogProduct[] = accessorySeed.map(([model, accessoryType, brand, price, availability, instruments], index) => ({
+	id: `accesorio-${index + 1}`, brand, model, type: accessoryType, price, availability, level: 'Principiante', date: `2026-09-${String(20 - index).padStart(2, '0')}`,
+	image: imageFor(`accessory-${index}`, index), attributes: { instrumento: [...instruments], tipoAccesorio: accessoryType },
+}));
+
+accessoriesCategory.brands = [...new Set(accessoryProducts.map((product) => product.brand))];
+accessoriesCategory.filters = accessoriesCategory.filters.map((filter) => ({ ...filter, options: [...new Set(accessoryProducts.flatMap((product) => { const value = product.attributes[filter.key]; return Array.isArray(value) ? value : [value]; }))] }));
+
+export const catalogOverview = (group: CatalogGroup): CatalogCategory => {
+	const categories = catalogCategories.filter((category) => category.group === group);
+	const filters = [...new Map(categories.flatMap((category) => category.filters).map((filter) => [filter.key, filter])).values()].map((filter) => ({
+		...filter,
+		options: [...new Set(categories.flatMap((category) => category.filters.find((item) => item.key === filter.key)?.options ?? []))],
+	}));
+	return {
+		group,
+		slug: group,
+		title: group === 'audio' ? 'Audio' : 'Instrumentos',
+		brands: [...new Set(categories.flatMap((category) => category.brands))],
+		types: [...new Set(categories.flatMap((category) => category.types))],
+		filters,
+		basePrice: Math.min(...categories.map((category) => category.basePrice)),
+		imageSeed: group,
+	};
+};
+
+export const productsForGroup = (group: CatalogGroup): CatalogProduct[] => catalogCategories.filter((category) => category.group === group).flatMap(productsFor);

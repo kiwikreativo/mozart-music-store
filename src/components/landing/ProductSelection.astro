@@ -5,13 +5,13 @@ const { products, whatsappLink } = Astro.props;
 ---
 
 <section id="seleccion" class="selection section-wrap">
-	<div class="section-heading"><p class="eyebrow">Elegidos para sonar bien</p><h2>Tres maneras de<br />hacer <em>armonía</em></h2></div>
+	<div class="section-heading"><p class="eyebrow">Una selección para empezar</p><h2>Elegí tu próximo<br /><em>capítulo.</em></h2><p class="section-intro">Tres instrumentos que abren tres caminos distintos. El punto de partida siempre es una conversación.</p></div>
 	<div class="product-grid">
 		{products.map((product, index) => (
 			<article class:list={['product-card', `product-${index + 1}`]}>
 				<a class="product-image" href={whatsappLink(product.name)} target="_blank" rel="noreferrer" aria-label={`Consultar ${product.name} por WhatsApp`}><img src={product.image} alt={product.name} loading="lazy" /><span>{String(index + 1).padStart(2, '0')}</span></a>
 				<div class="product-info"><div><p>{product.type}</p><h3>{product.name}</h3></div><p class="price">{product.price}</p></div>
-				<a class="text-link" href={whatsappLink(product.name)} target="_blank" rel="noreferrer">Consultar por WhatsApp <i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a>
+				<a class="text-link" href={whatsappLink(product.name)} target="_blank" rel="noreferrer">Quiero este instrumento <i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a>
 			</article>
 		))}
 	</div>

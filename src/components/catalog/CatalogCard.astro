@@ -1,11 +1,18 @@
 ---
 import type { CatalogProduct } from '../../data/catalog';
-interface Props { product: CatalogProduct; whatsappUrl: string; metaKeys: string[] }
-const { product, whatsappUrl, metaKeys } = Astro.props;
+interface Props { product: CatalogProduct; whatsappUrl: string; metaKeys: string[]; productUrl?: string; useUnicorn?: boolean }
+const { product, whatsappUrl, metaKeys, productUrl, useUnicorn = true } = Astro.props;
 const price = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 }).format(product.price);
 const filters = JSON.stringify({ type: product.type, brand: product.brand, availability: product.availability, level: product.level, ...product.attributes });
+const metadata = [product.type, ...metaKeys.map((key) => {
+	const value = product.attributes[key];
+	return Array.isArray(value) ? value.join(' y ') : value;
+}).filter(Boolean)].join(' · ');
 ---
-<article class="catalog-card" data-product data-price={product.price} data-date={product.date} data-filters={filters}>
+<article class="catalog-card" data-product data-product-url={productUrl} data-price={product.price} data-date={product.date} data-filters={filters}>
+	{useUnicorn && <div class="catalog-card-unicorn" data-us-project="qF3qXhdiOxdUeQYH8wCK" data-unicorn-card aria-hidden="true"></div>}
+	<div class="catalog-card-overlay" aria-hidden="true"></div>
+	{productUrl && <a class="catalog-card-link" href={productUrl} aria-label={`Ver ${product.brand} ${product.model}`}></a>}
 	<div class="catalog-image">
 		<img src={product.image} alt={`${product.brand} ${product.model}`} loading="lazy" />
 		<span class:list={['stock', product.availability === 'Disponible' && 'in-stock', product.availability === 'Por encargo' && 'on-order', product.availability === 'Agotado' && 'sold-out']}>{product.availability}</span>
@@ -13,10 +20,28 @@ const filters = JSON.stringify({ type: product.type, brand: product.brand, avail
 	<div class="catalog-card-content">
 		<p class="catalog-brand">{product.brand}</p>
 		<h2>{product.model}</h2>
-		<p class="catalog-meta">{[product.type, ...metaKeys.map((key) => product.attributes[key]).filter(Boolean)].join(' · ')}</p>
+		<p class="catalog-meta">{metadata}</p>
 		<div class="catalog-card-footer">
 			<p class="catalog-price">{price}</p>
 			<a class="catalog-whatsapp-cta" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label={`Consultar por ${product.brand} ${product.model} en WhatsApp`} title={`Consultar por ${product.brand} ${product.model} en WhatsApp`}><i class="ph-bold ph-whatsapp-logo" aria-hidden="true"></i></a>
 		</div>
 	</div>
 </article>
+
+<style>
+	@import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+	.catalog-card{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(circle at 100% 100%,rgba(153,75,42,.42),transparent 52%),linear-gradient(155deg,#141a24,#0b1019 58%,#231712);border:1px solid rgba(228,194,172,.25);border-radius:20px;color:#f8f5f2;font-family:'Elms Sans',sans-serif;transition:transform .22s ease,border-color .22s ease}
+	.catalog-card:hover{border-color:rgba(235,204,180,.5);transform:translateY(-3px)}
+	.catalog-card-unicorn,.catalog-card-overlay{position:absolute;inset:0;pointer-events:none}.catalog-card-unicorn{z-index:0;opacity:.7}.catalog-card-overlay{z-index:1;background:linear-gradient(to bottom,rgba(5,8,15,.04),rgba(5,8,15,.17) 45%,rgba(5,8,15,.64) 100%)}
+	.catalog-card-link{z-index:2}.catalog-image,.catalog-card-content{z-index:3!important;pointer-events:none}.catalog-card-content .catalog-whatsapp-cta{z-index:4!important;pointer-events:auto}
+	.catalog-image{height:280px;margin:10px 10px 0;overflow:hidden;border:1px solid rgba(255,244,235,.2);border-radius:14px;background:#171d23}.catalog-image img{filter:contrast(1.04) saturate(.9)}.catalog-card:hover .catalog-image img{filter:contrast(1.05) saturate(1);transform:scale(1.035)}
+	.stock{top:14px;left:14px;padding:7px 9px;border-radius:8px;font-family:'Elms Sans',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.02em}.stock.in-stock{color:#d8eadc;background:rgba(28,59,42,.82);border-color:rgba(185,216,195,.35)}.stock.on-order{color:#f1c99d;background:rgba(89,52,27,.82);border-color:rgba(241,201,157,.32)}.stock.sold-out{color:#d7d5d4;background:rgba(55,58,65,.82);border-color:rgba(215,213,212,.28)}
+	.catalog-card-content{min-height:184px;padding:20px}.catalog-brand{margin:0 0 9px;color:#f0b99d;font-family:'Elms Sans',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.065em}.catalog-card h2{color:#fff;font-family:'Elms Sans',sans-serif;font-size:clamp(1.38rem,2vw,1.56rem);font-weight:720;letter-spacing:-.045em;line-height:1.07}.catalog-meta{margin:10px 0 20px;color:rgba(244,239,235,.74);font-family:'Elms Sans',sans-serif;font-size:.86rem;font-weight:450;line-height:1.4}.catalog-price{color:#fff!important;font-family:'Elms Sans',sans-serif;font-size:clamp(1.72rem,2.7vw,2.08rem);font-weight:780;letter-spacing:-.06em}.catalog-card-content .catalog-whatsapp-cta{width:50px;height:50px;flex-basis:50px;border-radius:13px;color:#251a16;background:#f6eee8;border-color:rgba(255,255,255,.4);box-shadow:none}.catalog-card-content .catalog-whatsapp-cta:hover{color:#201511;background:#e3a080;transform:translateY(-2px)}.catalog-card-content .catalog-whatsapp-cta:focus-visible{outline-color:#f0b99d}
+	/* Semantic card roles. The navbar's global data-theme attribute is the only theme source. */
+	.catalog-card{--card-bg:radial-gradient(circle at 100% 100%,rgba(153,75,42,.42),transparent 52%),linear-gradient(155deg,#141a24,#0b1019 58%,#231712);--card-border:rgba(228,194,172,.25);--card-text-primary:#f7f4f2;--card-text-secondary:#beb6b3;--card-brand:#e5a27c;--card-price:#fff;--card-overlay:linear-gradient(to bottom,rgba(5,8,15,.04),rgba(5,8,15,.17) 45%,rgba(5,8,15,.64) 100%);--card-whatsapp-bg:#f4efea;--card-whatsapp-text:#161210;--card-image-border:rgba(255,244,235,.2);--card-shadow:none;background:var(--card-bg);border-color:var(--card-border);color:var(--card-text-primary);box-shadow:var(--card-shadow);transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .22s ease}.catalog-card-overlay{background:var(--card-overlay);transition:background .18s ease}.catalog-image{border-color:var(--card-image-border)}.catalog-brand{color:var(--card-brand)}.catalog-card h2{color:var(--card-text-primary)}.catalog-meta{color:var(--card-text-secondary)}.catalog-price{color:var(--card-price)!important}.catalog-card-content .catalog-whatsapp-cta{color:var(--card-whatsapp-text);background:var(--card-whatsapp-bg)}
+	:global(html[data-theme='light']) .catalog-card{--card-bg:#f7f3ef;--card-border:#d8cec6;--card-text-primary:#1d1917;--card-text-secondary:#685f5a;--card-brand:#a85f3d;--card-price:#171311;--card-overlay:linear-gradient(to bottom,rgba(247,243,239,.02),rgba(247,243,239,.34) 45%,rgba(247,243,239,.94) 100%);--card-whatsapp-bg:#1b1715;--card-whatsapp-text:#fff;--card-image-border:rgba(30,25,20,.18);--card-shadow:0 10px 28px rgba(58,45,35,.1)}
+	:global(html[data-theme='light']) .catalog-card:hover{border-color:#c8bbb1;box-shadow:0 12px 30px rgba(58,45,35,.12)}:global(html[data-theme='light']) .catalog-card-unicorn{opacity:.2;transition:opacity .18s ease}:global(html[data-theme='light']) .catalog-card-content .catalog-whatsapp-cta:hover{color:#fff;background:#332a26}:global(html[data-theme='light']) .catalog-card-content .catalog-whatsapp-cta:focus-visible{outline-color:#a85f3d}
+	:global(html[data-theme='light']) .stock.in-stock{color:#376446;background:#e6f1e8;border-color:#b9d3be}:global(html[data-theme='light']) .stock.on-order{color:#8a512a;background:#f4e6d8;border-color:#deb993}:global(html[data-theme='light']) .stock.sold-out{color:#655b56;background:#e9e5e2;border-color:#d2cac5}
+	@media(max-width:760px){.catalog-card-content{min-height:178px}.catalog-image{height:330px}.catalog-card h2{font-size:1.38rem}.catalog-price{font-size:1.7rem}}
+	@media(prefers-reduced-motion:reduce){.catalog-card,.catalog-image img,.catalog-card-content .catalog-whatsapp-cta{transition:none!important}.catalog-card:hover,.catalog-card:hover .catalog-image img,.catalog-card-content .catalog-whatsapp-cta:hover{transform:none}.catalog-card-unicorn{display:none}}
+</style>

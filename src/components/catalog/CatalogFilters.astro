@@ -1,15 +1,22 @@
 ---
 import type { CatalogFilter } from '../../data/catalog';
-interface Props { filters: CatalogFilter[]; brands: string[]; types: string[] }
-const { filters, brands, types } = Astro.props;
+interface Props { filters: CatalogFilter[]; brands: string[]; types: string[]; minPrice: number; maxPrice: number; accessoryMode?: boolean }
+const { filters, brands, types, minPrice, maxPrice, accessoryMode = false } = Astro.props;
+const money = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 });
 const commonFilters: CatalogFilter[] = [
 	{ key: 'type', label: 'Tipo', icon: 'ph-shapes', options: types },
 	{ key: 'brand', label: 'Marca', icon: 'ph-tag', options: brands },
 	{ key: 'availability', label: 'Disponibilidad', icon: 'ph-package', options: ['Disponible', 'Por encargo', 'Agotado'] },
 	{ key: 'level', label: 'Nivel', icon: 'ph-graduation-cap', options: ['Principiante', 'Intermedio', 'Profesional'] },
 ];
+const sections = accessoryMode
+	? [...filters, commonFilters[1], { key: 'price', label: 'Rango de precio', icon: 'ph-currency-circle-dollar', options: [] }, commonFilters[2]]
+	: [...commonFilters.slice(0, 2), { key: 'price', label: 'Rango de precio', icon: 'ph-currency-circle-dollar', options: [] }, ...commonFilters.slice(2, 3), ...filters, commonFilters[3]];
 ---
-<aside class="catalog-filters" data-filter-panel>
-	<div class="filter-heading"><h2>Filtrar por</h2><button type="button" data-clear-filters><i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i>Limpiar filtros</button></div>
-	{[...commonFilters.slice(0, 2), { key: 'price', label: 'Rango de precio', icon: 'ph-currency-circle-dollar', options: [] }, ...commonFilters.slice(2, 3), ...filters, commonFilters[3]].map((filter) => filter.key === 'price' ? <details><summary><i class:list={['filter-icon', 'ph-bold', filter.icon]} aria-hidden="true"></i>{filter.label}<i class="filter-caret ph-bold ph-caret-down" aria-hidden="true"></i></summary><div class="filter-options price-inputs"><label>Desde<input type="number" name="minPrice" min="0" placeholder="₡0" /></label><label>Hasta<input type="number" name="maxPrice" min="0" placeholder="₡500.000" /></label></div></details> : <details><summary><i class:list={['filter-icon', 'ph-bold', filter.icon]} aria-hidden="true"></i>{filter.label}<i class="filter-caret ph-bold ph-caret-down" aria-hidden="true"></i></summary><div class="filter-options">{filter.options.map((value) => <label class="filter-option"><input type="checkbox" name={filter.key} value={value} /><span class="checkbox-ui" aria-hidden="true"><i class="ph-bold ph-check"></i></span>{value}</label>)}</div></details>)}
+<aside class="catalog-filters" data-filter-panel aria-label="Filtros de productos">
+	<div class="filter-heading"><h2>Filtrar por</h2><button type="button" data-clear-filters><i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i><span>Limpiar filtros</span></button><button class="filter-close" type="button" data-close-filters aria-label="Cerrar filtros"><i class="ph-bold ph-x" aria-hidden="true"></i></button></div>
+	<div class="filter-sections">
+		{sections.map((filter, index) => { const panelId = `filter-${filter.key}`; const expanded = index === 0; return <section class="filter-section"><button class="filter-trigger" type="button" aria-expanded={expanded ? 'true' : 'false'} aria-controls={panelId} data-filter-accordion><span><i class:list={['filter-icon', 'ph-bold', filter.icon]} aria-hidden="true"></i>{filter.label}</span><i class="filter-caret ph-bold ph-caret-down" aria-hidden="true"></i></button><div id={panelId} class="filter-options" hidden={!expanded}>{filter.key === 'price' ? <div class="price-filter"><div class="price-inputs"><label>Min<input type="number" name="minPrice" min={minPrice} max={maxPrice} value={minPrice} inputmode="numeric" /><span>{money.format(minPrice)}</span></label><label>Max<input type="number" name="maxPrice" min={minPrice} max={maxPrice} value={maxPrice} inputmode="numeric" /><span>{money.format(maxPrice)}</span></label></div><div class="price-sliders" aria-label="Rango de precio"><input type="range" data-price-min min={minPrice} max={maxPrice} value={minPrice} aria-label="Precio mínimo" /><input type="range" data-price-max min={minPrice} max={maxPrice} value={maxPrice} aria-label="Precio máximo" /></div></div> : filter.options.map((value) => <label class="filter-option"><input type="checkbox" name={filter.key} value={value} /><span class="checkbox-ui" aria-hidden="true"><i class="ph-bold ph-check"></i></span><span>{value}</span></label>)}</div></section>; })}
+	</div>
+	<div class="filter-footer"><button class="filter-results" type="button" data-apply-filters>Ver resultados</button></div>
 </aside>
