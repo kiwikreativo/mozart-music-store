@@ -17,6 +17,7 @@ export type CatalogProduct = {
 	level: 'Principiante' | 'Intermedio' | 'Profesional';
 	date: string;
 	image: string;
+	accentColor?: string;
 	attributes: Record<string, string | string[]>;
 };
 
@@ -66,6 +67,7 @@ export const productsFor = (category: CatalogCategory): CatalogProduct[] => Arra
 		id: 'tagima-tw61-jazz-red', brand: 'Tagima', model: 'TW-61 Jazz Red', type: 'Eléctrica', price: 120253,
 		availability: 'Disponible', level: 'Profesional', date: '2026-09-04', image: '/products/tagima-tw61-jazz-red/tagima-tw61-jazz-red-01.jpg',
 		attributes: { cuerdas: '6 cuerdas', orientacion: 'Diestro' },
+		accentColor: '#c0393f',
 	};
 	const brand = category.brands[index % category.brands.length];
 	const type = category.types[index % category.types.length];
@@ -80,6 +82,7 @@ export const productsFor = (category: CatalogCategory): CatalogProduct[] => Arra
 		level: ['Principiante', 'Intermedio', 'Profesional'][index % 3] as CatalogProduct['level'],
 		date: `2026-08-${String(31 - index).padStart(2, '0')}`,
 		image: imageFor(category.imageSeed, index),
+		accentColor: ['#c0393f', '#8b5e3c', '#2563a8', '#2f7d5a'][index % 4],
 		attributes,
 	};
 });

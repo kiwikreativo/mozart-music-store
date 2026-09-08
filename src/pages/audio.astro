@@ -6,4 +6,4 @@ const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
 const category = catalogOverview('audio');
 const products = productsForGroup('audio');
 ---
-<Layout title="Audio | Mozart"><CatalogPage {category} {products} {whatsappNumber} /></Layout>
+<Layout title="Audio | Mozart" footerVariant="standard"><CatalogPage {category} {products} {whatsappNumber} /></Layout>

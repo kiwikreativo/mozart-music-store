@@ -1,0 +1,105 @@
+---
+import '@phosphor-icons/web/bold';
+
+const guitarImage = '/products/acustica-serie-01/404-guitar.png';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>404 | Página no encontrada — Mozart</title>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        let saved = null;
+        try { saved = localStorage.getItem('mozart-theme'); } catch {}
+        const theme = saved === 'light' || saved === 'dark'
+          ? saved
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="not-found-page">
+      <header class="not-found-header">
+        <a class="brand" href="/" aria-label="Mozart, volver al inicio">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="brand-name">MOZART</span>
+          <span class="brand-tagline">MÚSICA PARA LA VIDA</span>
+        </a>
+        <span class="header-note">404 / NOTA PERDIDA</span>
+      </header>
+
+      <section class="not-found-content" aria-labelledby="not-found-title">
+        <div class="error-visual" aria-hidden="true">
+          <span class="error-number">4</span>
+          <div class="guitar-wrapper">
+            <img src={guitarImage} alt="" />
+          </div>
+          <span class="error-number">4</span>
+        </div>
+
+        <div class="error-copy">
+          <p class="eyebrow">HISTORIAS QUE RESUENAN</p>
+          <h1 id="not-found-title">Este acorde no fue encontrado</h1>
+          <p class="supporting-copy">Tal vez tocamos la nota equivocada. Volvamos a una parte conocida.</p>
+          <a class="back-home-button" href="/">
+            <i class="ph-bold ph-arrow-left" aria-hidden="true"></i>
+            <span>Volver al inicio</span>
+          </a>
+        </div>
+      </section>
+      <span class="corner-note corner-note--left" aria-hidden="true">♪ 404</span>
+      <span class="corner-note corner-note--right" aria-hidden="true">BUEN SONIDO<br />SIEMPRE ENCUENTRA<br />SU CAMINO</span>
+    </main>
+  </body>
+</html>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+  :global(*) { box-sizing: border-box; }
+  :global(html), :global(body) { margin: 0; min-height: 100%; }
+  :global(body) { font-family: 'Elms Sans', Arial, sans-serif; background: var(--error-bg); color: var(--error-text); }
+  :global(:root) {
+    --error-bg: #f5f1ea; --error-surface: #fffdf9; --error-text: #17191c;
+    --error-muted: #6f716f; --error-border: rgba(23,25,28,.14); --error-accent: #087f96;
+  }
+  :global(html[data-theme='dark']) {
+    --error-bg: #030712; --error-surface: #111827; --error-text: #f8fafc;
+    --error-muted: #a1a1aa; --error-border: rgba(255,255,255,.15); --error-accent: #42b7d3;
+  }
+  .not-found-page { min-height: 100vh; width: min(100% - 16px, 1500px); margin: 8px auto; border: 1px solid var(--error-border); border-radius: 28px; overflow: hidden; position: relative; isolation: isolate; background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--error-accent) 7%, transparent), transparent 36%), var(--error-bg); padding: clamp(28px, 4vw, 64px) clamp(20px, 6vw, 92px) clamp(36px, 5vw, 76px); display: flex; flex-direction: column; }
+  .not-found-page::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .35; background-image: linear-gradient(var(--error-border) 1px, transparent 1px), linear-gradient(90deg, var(--error-border) 1px, transparent 1px); background-size: 72px 72px; mask-image: linear-gradient(to bottom, black, transparent 80%); pointer-events: none; }
+  .not-found-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+  .brand { color: var(--error-text); text-decoration: none; display: grid; grid-template-columns: auto auto; column-gap: 10px; align-items: center; width: max-content; }
+  .brand-mark { display: flex; gap: 3px; align-items: center; height: 29px; }
+  .brand-mark i { display: block; width: 4px; border-radius: 99px; background: currentColor; }
+  .brand-mark i:nth-child(1), .brand-mark i:nth-child(5) { height: 15px; } .brand-mark i:nth-child(2), .brand-mark i:nth-child(4) { height: 25px; } .brand-mark i:nth-child(3) { height: 31px; }
+  .brand-name { font-size: clamp(1.5rem, 2.2vw, 2.1rem); font-weight: 800; letter-spacing: -.06em; line-height: 1; }
+  .brand-tagline { grid-column: 2; font-size: .52rem; letter-spacing: .3em; color: var(--error-muted); margin-top: -2px; }
+  .header-note, .eyebrow, .corner-note { font-size: .65rem; font-weight: 700; letter-spacing: .2em; color: var(--error-accent); }
+  .header-note { padding-top: 8px; }
+  .not-found-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: clamp(42px, 7vh, 90px) 0 30px; }
+  .error-visual { width: min(100%, 900px); display: grid; grid-template-columns: auto minmax(180px, 30vw) auto; align-items: center; justify-content: center; justify-items: center; column-gap: clamp(.5rem, 2vw, 2rem); margin-inline: auto; }
+  .error-number { font-size: clamp(10rem, 25vw, 25rem); font-weight: 900; line-height: .72; letter-spacing: -.12em; color: color-mix(in srgb, var(--error-text) 9%, transparent); user-select: none; }
+  .guitar-wrapper { width: 100%; height: clamp(280px, 46vh, 550px); position: relative; display: grid; place-items: center; }
+  .guitar-wrapper img { position: relative; width: 100%; height: 100%; object-fit: contain; object-position: center; filter: saturate(.9) contrast(1.04); }
+  :global(html[data-theme='dark']) .guitar-wrapper img { opacity: .94; filter: saturate(.78) contrast(1.08) brightness(.96); }
+  .error-copy { max-width: 700px; margin-top: clamp(46px, 7vh, 86px); position: relative; z-index: 1; }
+  .eyebrow { margin: 0 0 15px; }
+  h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); line-height: .98; letter-spacing: -.055em; font-weight: 760; }
+  .supporting-copy { color: var(--error-muted); font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.5; margin: 20px auto 28px; max-width: 560px; }
+  .back-home-button { min-height: 50px; display: inline-flex; align-items: center; gap: 12px; padding: 0 24px; border-radius: 999px; background: var(--error-text); color: var(--error-bg); text-decoration: none; font-weight: 700; transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease; }
+  .back-home-button i { font-size: 1.2rem; }
+  .back-home-button:hover { transform: translateY(-2px); box-shadow: 0 10px 24px color-mix(in srgb, var(--error-text) 18%, transparent); }
+  .back-home-button:active { transform: translateY(0); } .back-home-button:focus-visible { outline: 3px solid var(--error-accent); outline-offset: 4px; }
+  .corner-note { position: absolute; bottom: 28px; color: color-mix(in srgb, var(--error-text) 42%, transparent); line-height: 1.5; }
+  .corner-note--left { left: clamp(20px, 4vw, 64px); font-size: 1.1rem; letter-spacing: .08em; } .corner-note--right { right: clamp(20px, 4vw, 64px); text-align: right; font-size: .58rem; }
+  @media (max-width: 700px) { .not-found-page { min-height: calc(100vh - 16px); border-radius: 22px; } .not-found-header { align-items: center; } .header-note { display: none; } .error-visual { width: min(100%, 500px); grid-template-columns: auto minmax(110px, 35vw) auto; column-gap: clamp(.3rem, 1.5vw, .8rem); } .error-number { font-size: clamp(7rem, 30vw, 11rem); } .guitar-wrapper { height: clamp(220px, 37vh, 330px); } .error-copy { margin-top: 42px; } .corner-note { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .back-home-button { transition: none; } .back-home-button:hover { transform: none; } }
+</style>

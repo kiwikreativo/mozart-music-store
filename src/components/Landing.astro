@@ -1,11 +1,11 @@
 ---
 import CategoryMarquee from './landing/CategoryMarquee.astro';
 import ClosingCta from './landing/ClosingCta.astro';
-import Footer from './landing/Footer.astro';
 import Hero from './landing/Hero.astro';
 import InstrumentCatalogue from './landing/InstrumentCatalogue.astro';
 import Manifesto from './landing/Manifesto.astro';
 import ProductSelection from './landing/ProductSelection.astro';
+import TestimonialsSection from './landing/TestimonialsSection.astro';
 
 const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? '';
 const whatsappLink = (product: string) => {
@@ -23,11 +23,11 @@ const products = [
 	<Hero />
 	<Manifesto />
 	<ProductSelection {products} {whatsappLink} />
+	<TestimonialsSection />
 	<InstrumentCatalogue catalogueUrl={whatsappLink('el catálogo completo')} />
 	<!-- <CategoryMarquee />
 	<ClosingCta whatsappUrl={whatsappLink('un instrumento')} /> -->
 </main>
-<Footer whatsappUrl={whatsappLink('Mozart')} />
 
 <script>
 	import { gsap } from 'gsap';
@@ -36,8 +36,8 @@ const products = [
 	gsap.from('.hero-copy > *', { y: 36, opacity: 0, duration: 1, stagger: 0.12, ease: 'power3.out', delay: 0.15 });
 	gsap.from('.hero-art', { scale: 0.88, opacity: 0, duration: 1.2, ease: 'power3.out' });
 	gsap.utils.toArray<HTMLElement>('.product-card').forEach((card) => gsap.fromTo(card, { scale: 0.86, opacity: 0.15 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top 85%', end: 'bottom 50%', scrub: true } }));
+	gsap.utils.toArray<HTMLElement>('.testimonial-card').forEach((card) => gsap.fromTo(card, { y: 34, opacity: 0.2 }, { y: 0, opacity: 1, ease: 'power2.out', scrollTrigger: { trigger: card, start: 'top 88%', end: 'top 62%', scrub: true } }));
 	ScrollTrigger.matchMedia({ '(min-width: 900px)': () => ScrollTrigger.create({ trigger: '.catalogue', start: 'top top+=48', end: 'bottom bottom', pin: '.catalogue-sticky', pinSpacing: false }) });
-	gsap.fromTo('.manifesto p', { opacity: 0.13 }, { opacity: 1, ease: 'none', scrollTrigger: { trigger: '.manifesto', start: 'top 75%', end: 'bottom 45%', scrub: true } });
 	gsap.utils.toArray<HTMLElement>('.catalogue-item').forEach((item) => gsap.fromTo(item, { scale: 0.82, opacity: 0.2 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: item, start: 'top 86%', end: 'bottom 55%', scrub: true } }));
 </script>
 
@@ -107,8 +107,38 @@ const products = [
 	html[data-theme='light'] footer{background:var(--color-bg);color:var(--color-text);border-color:var(--color-border)}
 	html[data-theme='light'] footer p{color:var(--color-text-muted)}
 	html[data-theme='light'] em{color:var(--color-accent)}
-	html[data-theme='light'] .button{color:var(--color-on-primary)}
+	html[data-theme='light'] .landing-page .button,
+	html[data-theme='light'] .landing-page .button-light,
+	html[data-theme='light'] .landing-page .button-dark,
+	html[data-theme='light'] .landing-page .button:hover,
+	html[data-theme='light'] .landing-page .button:focus-visible,
+	html[data-theme='light'] .landing-page .button:active{color:#111827}
 
 	/* Landing actions only: improve scanability without changing site-wide controls. */
 	.landing-page .button{min-height:54px;gap:10px;padding:15px 22px;font-size:1.0625rem;letter-spacing:.01em}.landing-page .button i{font-size:1.4rem}.landing-page .text-link{display:inline-flex;min-height:48px;align-items:center;gap:9px;font-size:.98rem;letter-spacing:.045em}.landing-page .text-link i{font-size:1.3rem}.button:focus-visible,.text-link:focus-visible{outline-width:3px}@media(max-width:760px){.landing-page .button{min-height:50px;padding:13px 18px;font-size:1rem}.landing-page .button i{font-size:1.3rem}.landing-page .text-link{min-height:46px;font-size:.92rem}}
+ .landing-page .manifesto{background:var(--color-surface-alt);color:var(--color-text)}.landing-page .manifesto p{color:var(--color-text)}.landing-page .manifesto p em{color:var(--color-accent);opacity:1}
+ /* Landing CTA glass system: neutral at rest, cool luminous tint on hover. */
+ .landing-page .button{color:#111827;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.82);box-shadow:inset 0 1px 0 rgba(255,255,255,.92),inset 0 -1px 0 rgba(148,163,184,.22),0 10px 26px rgba(15,23,42,.16);backdrop-filter:blur(16px) saturate(115%);-webkit-backdrop-filter:blur(16px) saturate(115%)}.landing-page .button::before{background:linear-gradient(135deg,rgba(255,255,255,.42),transparent 52%)}.landing-page .button:hover{color:#111827;background:rgba(232,234,250,.86);border-color:rgba(255,255,255,.98);box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 14px 32px rgba(99,102,241,.2),0 0 22px rgba(129,140,248,.14);filter:none;transform:translateY(-2px)}.landing-page .button:active{color:#111827;transform:translateY(0) scale(.99);box-shadow:inset 0 1px 0 rgba(255,255,255,.78),0 7px 16px rgba(15,23,42,.14)}.landing-page .button-light,.landing-page .button-dark{background:rgba(255,255,255,.72);color:#111827}
+ html[data-theme='dark'] .landing-page .button{color:#111827;background:rgba(241,245,249,.82);border-color:rgba(255,255,255,.84)}html[data-theme='dark'] .landing-page .button:hover{background:rgba(226,232,255,.9)}
+ @media(prefers-reduced-transparency:reduce){.landing-page .button{background:var(--color-surface);backdrop-filter:none;-webkit-backdrop-filter:none}.landing-page .button:hover{background:var(--color-surface-alt)}}
+ .landing-page .button,.landing-page .button-light,.landing-page .button-dark{color:#111827}
+</style>
+<style is:global>
+html[data-theme='light'] .landing-page .hero-actions .button-light,
+html[data-theme='light'] .landing-page .hero-actions .button-light:hover,
+html[data-theme='light'] .landing-page .hero-actions .button-light:focus-visible,
+html[data-theme='light'] .landing-page .hero-actions .button-light:active {
+	color: #111827;
+}
+html[data-theme='light'] .landing-page .hero-actions .button-light i {
+	color: #111827;
+}
+html[data-theme='light'] .landing-page .hero-actions .hero-link,
+html[data-theme='light'] .landing-page .hero-actions .hero-link:hover,
+html[data-theme='light'] .landing-page .hero-actions .hero-link:focus-visible {
+	color: var(--color-text);
+}
+html[data-theme='light'] .landing-page .hero-actions .hero-link i {
+	color: var(--color-accent);
+}
 </style>
