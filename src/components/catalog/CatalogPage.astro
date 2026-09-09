@@ -4,6 +4,7 @@ import { productsFor } from '../../data/catalog';
 import CatalogCard from './CatalogCard.astro';
 import CatalogFilters from './CatalogFilters.astro';
 import { productDetailUrl } from '../../data/productDetails';
+import Pagination from './Pagination.astro';
 interface Props { category: CatalogCategory; whatsappNumber: string; products?: CatalogProduct[] }
 const { category, whatsappNumber, products: suppliedProducts } = Astro.props;
 const products = suppliedProducts ?? productsFor(category);
@@ -19,7 +20,7 @@ const whatsappLink = (product: string) => {
 <main class="catalog-page">
 	<header class="catalog-header"><p class="breadcrumb"><a href="/">Inicio</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i>{isBrowseAllPage ? <strong>{category.title}</strong> : <><a href={`/${category.group}`}>{category.group === 'audio' ? 'Audio' : 'Instrumentos'}</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i><strong>{category.title}</strong></>}</p><h1>{category.title}</h1>{accessoryMode && <p class="catalog-lede">Encuentra accesorios para complementar, proteger y mantener tus instrumentos.</p>}</header>
 	<div class="catalog-toolbar"><button class="mobile-filter-toggle" type="button" data-open-filters>Filtrar productos <i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i></button><p data-result-count>Mostrando {products.length} productos</p><label class="sort-control">Ordenar por <select data-sort><option value="relevance">Relevancia</option><option value="low">Precio: menor a mayor</option><option value="high">Precio: mayor a menor</option><option value="newest">Novedades</option></select></label></div>
-	<div class="catalog-layout"><CatalogFilters filters={category.filters} brands={category.brands} types={category.types} {minPrice} {maxPrice} {accessoryMode} /><section class="catalog-results" aria-label={`Resultados de ${category.title.toLowerCase()}`}><div class="catalog-grid" data-product-grid>{products.map((product, index) => <CatalogCard product={product} metaKeys={accessoryMode ? ['instrumento'] : category.filters.map((filter) => filter.key)} productUrl={productDetailUrl(product)} whatsappUrl={whatsappLink(`${product.brand} ${product.model}`)} useUnicorn={index < 12} />)}</div><div class="catalog-empty" data-empty-state hidden><h2>{accessoryMode ? 'No encontramos accesorios que coincidan con estos filtros.' : 'No encontramos productos con estos filtros.'}</h2><p>Prueba limpiando los filtros para ver toda la selección.</p><button type="button" data-clear-filters>Limpiar filtros</button></div></section></div>
+	<div class="catalog-layout"><CatalogFilters filters={category.filters} brands={category.brands} types={category.types} {minPrice} {maxPrice} {accessoryMode} /><section class="catalog-results" aria-label={`Resultados de ${category.title.toLowerCase()}`}><div class="catalog-grid" data-product-grid>{products.map((product, index) => <CatalogCard product={product} metaKeys={accessoryMode ? ['instrumento'] : category.filters.map((filter) => filter.key)} productUrl={productDetailUrl(product)} whatsappUrl={whatsappLink(`${product.brand} ${product.model}`)} useUnicorn={index < 12} />)}</div><Pagination /><div class="catalog-empty" data-empty-state hidden><h2>{accessoryMode ? 'No encontramos accesorios que coincidan con estos filtros.' : 'No encontramos productos con estos filtros.'}</h2><p>Prueba limpiando los filtros para ver toda la selección.</p><button type="button" data-clear-filters>Limpiar filtros</button></div></section></div>
 </main>
 
 <script>
@@ -31,23 +32,35 @@ const whatsappLink = (product: string) => {
 		const empty = page.querySelector<HTMLElement>('[data-empty-state]');
 		const grid = page.querySelector<HTMLElement>('[data-product-grid]');
 		const sort = page.querySelector<HTMLSelectElement>('[data-sort]');
+		const pagination = page.querySelector<HTMLElement>('[data-pagination]');
+		const pageNumbers = page.querySelector<HTMLElement>('[data-page-numbers]');
+		const prev = page.querySelector<HTMLButtonElement>('[data-page-prev]');
+		const next = page.querySelector<HTMLButtonElement>('[data-page-next]');
+		let currentPage = 1;
+		const pageSize = 7;
 		const minInput = page.querySelector<HTMLInputElement>('input[name="minPrice"]');
 		const maxInput = page.querySelector<HTMLInputElement>('input[name="maxPrice"]');
 		const minRange = page.querySelector<HTMLInputElement>('[data-price-min]');
 		const maxRange = page.querySelector<HTMLInputElement>('[data-price-max]');
 		const apply = page.querySelector<HTMLButtonElement>('[data-apply-filters]');
 		const selected = (name: string) => [...page.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)].map((input) => input.value);
-		const update = () => {
+		const update = (resetPage = true) => {
+			if (resetPage) currentPage = 1;
 			const active = [...new Set([...page.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].map((input) => input.name))].map((key) => [key, selected(key)] as const);
 			const min = Number(page.querySelector<HTMLInputElement>('input[name="minPrice"]')?.value || 0);
 			const max = Number(page.querySelector<HTMLInputElement>('input[name="maxPrice"]')?.value || Number.POSITIVE_INFINITY);
 			const visible = cards.filter((card) => { const values = JSON.parse(card.dataset.filters ?? '{}') as Record<string, string | string[]>; return Number(card.dataset.price) >= min && Number(card.dataset.price) <= max && active.every(([key, options]) => { const value = values[key]; return options.length === 0 || (Array.isArray(value) ? value.some((item) => options.includes(item)) : options.includes(value ?? '')); }); });
-			cards.forEach((card) => card.hidden = !visible.includes(card));
-			visible.sort((a, b) => sort?.value === 'low' ? Number(a.dataset.price) - Number(b.dataset.price) : sort?.value === 'high' ? Number(b.dataset.price) - Number(a.dataset.price) : sort?.value === 'newest' ? String(b.dataset.date).localeCompare(String(a.dataset.date)) : 0).forEach((card) => grid?.append(card));
+			visible.sort((a, b) => sort?.value === 'low' ? Number(a.dataset.price) - Number(b.dataset.price) : sort?.value === 'high' ? Number(b.dataset.price) - Number(a.dataset.price) : sort?.value === 'newest' ? String(b.dataset.date).localeCompare(String(a.dataset.date)) : 0);
+			const totalPages = Math.ceil(visible.length / pageSize);
+			if (currentPage > totalPages) currentPage = Math.max(1, totalPages);
+			cards.forEach((card) => card.hidden = true);
+			visible.slice((currentPage - 1) * pageSize, currentPage * pageSize).forEach((card) => { card.hidden = false; grid?.append(card); });
 			if (count) count.textContent = `Mostrando ${visible.length} ${visible.length === 1 ? 'producto' : 'productos'}`;
 			if (apply) apply.textContent = `Ver ${visible.length} ${visible.length === 1 ? 'producto' : 'productos'}`;
 			if (empty) empty.hidden = visible.length !== 0;
+			if (pagination && pageNumbers) { pagination.hidden = totalPages <= 1; pageNumbers.replaceChildren(); const add = (label: string, value?: number) => { const el = document.createElement(value ? 'button' : 'span'); el.textContent = label; if (value) { (el as HTMLButtonElement).type = 'button'; el.className = value === currentPage ? 'is-active' : ''; (el as HTMLButtonElement).dataset.page = String(value); } else el.className = 'is-ellipsis'; pageNumbers.append(el); }; const pages: Array<number | null> = totalPages <= 7 ? Array.from({length: totalPages}, (_, i) => i + 1) : currentPage <= 5 ? [1, 2, 3, 4, 5, null, totalPages] : currentPage >= totalPages - 3 ? [1, null, totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages] : [1, null, currentPage - 1, currentPage, currentPage + 1, null, totalPages]; pages.forEach((n) => n === null ? add('…') : add(String(n), n)); if (prev) prev.disabled = currentPage <= 1; if (next) next.disabled = currentPage >= totalPages; }
 		};
+		const changePage = (pageNumber: number) => { currentPage = pageNumber; update(false); page?.querySelector('[data-product-grid]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 		const syncPrice = (source: 'min' | 'max') => {
 			if (!minInput || !maxInput || !minRange || !maxRange) return;
 			let min = Number(minInput.value || minRange.min);
@@ -87,6 +100,9 @@ const whatsappLink = (product: string) => {
 				document.head.append(script);
 			}
 		}
+		pageNumbers?.addEventListener('click', (event) => { const target = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-page]'); if (target) changePage(Number(target.dataset.page)); });
+		prev?.addEventListener('click', () => changePage(currentPage - 1));
+		next?.addEventListener('click', () => changePage(currentPage + 1));
 		update();
 	}
 </script>
@@ -169,4 +185,5 @@ const whatsappLink = (product: string) => {
 	@media(max-width:760px){.catalog-layout{display:block}.catalog-filters{position:fixed;z-index:20;top:0;right:0;display:flex;width:min(92vw,380px);max-height:none;height:100dvh;margin:0;padding:24px;flex-direction:column;border-radius:26px 0 0 26px;box-shadow:-20px 0 60px rgba(3,7,18,.22);transform:translateX(105%);transition:transform .24s cubic-bezier(.16,1,.3,1),background-color .18s ease,border-color .18s ease}.catalog-filters.is-open{transform:translateX(0)}.filter-heading{margin-bottom:18px}.filter-close{display:grid!important;width:36px;place-items:center;color:var(--filter-text-primary)!important;font-size:1.1rem}.filter-sections{overflow:auto;padding-right:2px}.filter-footer{margin-top:auto;padding-top:18px;background:var(--filter-background)}.mobile-filter-toggle{color:var(--filter-text-primary);background:var(--filter-background);border-color:var(--filter-border)}}
 	@media(max-width:760px){.catalog-filters{z-index:200}}
 	@media(prefers-reduced-motion:reduce){.catalog-filters,.filter-trigger,.filter-caret,.filter-results{transition:none!important}}
+	.catalog-pagination{display:flex;justify-content:center;align-items:center;gap:8px;margin:48px auto 0}.catalog-pagination button,.catalog-pagination span{display:grid;place-items:center;min-width:38px;height:38px;padding:0;border:1px solid var(--color-border,rgba(255,255,255,.16));border-radius:10px;background:var(--color-surface,rgba(255,255,255,.04));color:var(--color-text-muted,#a1a1aa);font:600 .86rem 'Geist',sans-serif}.catalog-pagination button{cursor:pointer;transition:color .18s ease,background .18s ease,border-color .18s ease,transform .18s ease}.catalog-pagination button:hover:not(:disabled){color:var(--color-text,#fff);border-color:var(--color-accent,#8b5cf6);transform:translateY(-2px)}.catalog-pagination button:disabled{opacity:.35;cursor:not-allowed}.catalog-pagination [data-page-numbers]{display:flex;align-items:center;gap:6px}.catalog-pagination [data-page].is-active{position:relative;color:var(--color-accent,#8b5cf6);border-color:var(--color-accent,#8b5cf6);background:color-mix(in srgb,var(--color-accent,#8b5cf6) 12%,transparent)}.catalog-pagination [data-page].is-active::after{position:absolute;right:9px;bottom:4px;left:9px;height:2px;border-radius:99px;background:currentColor;content:''}.catalog-pagination .is-ellipsis{min-width:22px;border-color:transparent;background:transparent}.catalog-pagination button:focus-visible{outline:2px solid var(--color-accent,#8b5cf6);outline-offset:3px}@media(max-width:760px){.catalog-pagination{gap:4px;margin-top:36px}.catalog-pagination button,.catalog-pagination span{min-width:36px;height:36px}.catalog-pagination [data-page-numbers]{gap:3px}}
 </style>
