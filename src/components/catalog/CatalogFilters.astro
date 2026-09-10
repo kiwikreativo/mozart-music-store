@@ -1,7 +1,7 @@
 ---
 import type { CatalogFilter } from '../../data/catalog';
-interface Props { filters: CatalogFilter[]; brands: string[]; types: string[]; minPrice: number; maxPrice: number; accessoryMode?: boolean }
-const { filters, brands, types, minPrice, maxPrice, accessoryMode = false } = Astro.props;
+interface Props { filters: CatalogFilter[]; brands: string[]; types: string[]; minPrice: number; maxPrice: number; accessoryMode?: boolean; categoryFilter?: CatalogFilter }
+const { filters, brands, types, minPrice, maxPrice, accessoryMode = false, categoryFilter } = Astro.props;
 const money = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 });
 const commonFilters: CatalogFilter[] = [
 	{ key: 'type', label: 'Tipo', icon: 'ph-shapes', options: types },
@@ -11,7 +11,7 @@ const commonFilters: CatalogFilter[] = [
 ];
 const sections = accessoryMode
 	? [...filters, commonFilters[1], { key: 'price', label: 'Rango de precio', icon: 'ph-currency-circle-dollar', options: [] }, commonFilters[2]]
-	: [...commonFilters.slice(0, 2), { key: 'price', label: 'Rango de precio', icon: 'ph-currency-circle-dollar', options: [] }, ...commonFilters.slice(2, 3), ...filters, commonFilters[3]];
+	: [...(categoryFilter ? [categoryFilter] : []), ...commonFilters.slice(0, 2), { key: 'price', label: 'Rango de precio', icon: 'ph-currency-circle-dollar', options: [] }, ...commonFilters.slice(2, 3), ...filters, commonFilters[3]];
 ---
 <aside class="catalog-filters" data-filter-panel aria-label="Filtros de productos">
 	<div class="filter-heading"><h2>Filtrar por</h2><button type="button" data-clear-filters><i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i><span>Limpiar filtros</span></button><button class="filter-close" type="button" data-close-filters aria-label="Cerrar filtros"><i class="ph-bold ph-x" aria-hidden="true"></i></button></div>

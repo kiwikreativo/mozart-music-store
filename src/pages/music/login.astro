@@ -1,0 +1,21 @@
+---
+export const prerender = false;
+import AdminAuthLayout from '../../layouts/AdminAuthLayout.astro';
+import PasswordField from '../../components/admin/PasswordField.astro';
+---
+<AdminAuthLayout title="Panel de administración">
+  <main class="login-page">
+    <section class="auth-card" aria-labelledby="login-title">
+      <a class="auth-logo" href="/" aria-label="Mozart, ir a la tienda">MOZART<span>®</span></a>
+      <h1 id="login-title">Panel de administración</h1>
+      <p class="auth-description">Accede para gestionar el catálogo y contenido de la tienda.</p>
+      <form data-auth-form="login">
+        <div class="auth-field"><label for="username">Nombre de usuario</label><input id="username" name="username" required maxlength="64" autocomplete="username" autocapitalize="none" spellcheck="false" /></div>
+        <PasswordField name="password" label="Contraseña" autocomplete="current-password" />
+        <p class="auth-feedback" data-auth-feedback role="status" aria-live="polite" hidden></p>
+        <button class="primary-action auth-submit" type="submit">Iniciar sesión</button>
+        <div class="auth-form-footer"><a class="auth-secondary-link" href="/forgot-password/">¿Olvidaste tu contraseña?</a></div>
+      </form>
+    </section>
+  </main>
+</AdminAuthLayout>

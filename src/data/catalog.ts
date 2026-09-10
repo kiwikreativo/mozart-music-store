@@ -9,6 +9,7 @@ export type CatalogFilter = {
 
 export type CatalogProduct = {
 	id: string;
+	category: string;
 	brand: string;
 	model: string;
 	type: string;
@@ -64,7 +65,7 @@ const imageFor = (seed: string, index: number) => `https://images.unsplash.com/p
 
 export const productsFor = (category: CatalogCategory): CatalogProduct[] => Array.from({ length: 12 }, (_, index) => {
 	if (category.group === 'instrumentos' && category.slug === 'guitarras' && index === 0) return {
-		id: 'tagima-tw61-jazz-red', brand: 'Tagima', model: 'TW-61 Jazz Red', type: 'Eléctrica', price: 120253,
+		id: 'tagima-tw61-jazz-red', category: category.title, brand: 'Tagima', model: 'TW-61 Jazz Red', type: 'Eléctrica', price: 120253,
 		availability: 'Disponible', level: 'Profesional', date: '2026-09-04', image: '/products/tagima-tw61-jazz-red/tagima-tw61-jazz-red-01.jpg',
 		attributes: { cuerdas: '6 cuerdas', orientacion: 'Diestro' },
 		accentColor: '#c0393f',
@@ -74,6 +75,7 @@ export const productsFor = (category: CatalogCategory): CatalogProduct[] => Arra
 	const attributes = Object.fromEntries(category.filters.map((filter, filterIndex) => [filter.key, filter.options[(index + filterIndex) % filter.options.length]]));
 	return {
 		id: `${category.slug}-${index + 1}`,
+		category: category.title,
 		brand,
 		model: `${type} Serie ${String(index + 1).padStart(2, '0')}`,
 		type,
@@ -122,7 +124,7 @@ const accessorySeed = [
 ] as const;
 
 export const accessoryProducts: CatalogProduct[] = accessorySeed.map(([model, accessoryType, brand, price, availability, instruments], index) => ({
-	id: `accesorio-${index + 1}`, brand, model, type: accessoryType, price, availability, level: 'Principiante', date: `2026-09-${String(20 - index).padStart(2, '0')}`,
+	id: `accesorio-${index + 1}`, category: 'Accesorios', brand, model, type: accessoryType, price, availability, level: 'Principiante', date: `2026-09-${String(20 - index).padStart(2, '0')}`,
 	image: imageFor(`accessory-${index}`, index), attributes: { instrumento: [...instruments], tipoAccesorio: accessoryType },
 }));
 
