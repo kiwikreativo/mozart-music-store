@@ -1,0 +1,31 @@
+---
+export const prerender = false;
+import AdminAuthLayout from '../../layouts/AdminAuthLayout.astro';
+import AdminHeader from '../../components/admin/AdminHeader.astro';
+import PasswordField from '../../components/admin/PasswordField.astro';
+---
+<AdminAuthLayout title="Cambiar contraseña">
+  <main class="music-admin">
+    <aside class="admin-sidebar"><a class="admin-mark" href="/">MOZART<span>®</span></a><nav aria-label="Administración"><a href="/music/#products"><i class="ph-bold ph-package" aria-hidden="true"></i>Productos</a><a href="/music/?agregar=1"><i class="ph-bold ph-plus-circle" aria-hidden="true"></i>Agregar producto</a></nav><button class="admin-logout" type="button" data-logout><i class="ph-bold ph-sign-out" aria-hidden="true"></i>Cerrar sesión</button></aside>
+    <section class="admin-main">
+      <AdminHeader search={false} />
+      <section class="auth-card password-card" aria-labelledby="password-title">
+        <div class="auth-title"><i class="ph-bold ph-lock-key" aria-hidden="true"></i><div><h1 id="password-title">Cambiar contraseña</h1><p class="auth-description">Actualiza la contraseña de acceso al panel administrativo.</p></div></div>
+        <form data-auth-form="password">
+          <PasswordField name="current" label="Contraseña actual" autocomplete="current-password" />
+          <PasswordField name="next" label="Nueva contraseña" />
+          <PasswordField name="confirm" label="Confirmar nueva contraseña" />
+          <section class="password-guidance" aria-label="Requisitos de contraseña">
+            <div class="strength-heading"><span>Seguridad de la contraseña</span><span data-strength-label>Débil</span></div>
+            <meter data-strength min="0" max="3" value="0" aria-label="Seguridad de la contraseña"></meter>
+            <p>La contraseña debe contener:</p>
+            <ul><li data-rule="length"><i class="ph-bold ph-circle" aria-hidden="true"></i><span>Al menos 8 caracteres</span><span class="sr-only" data-rule-state>: pendiente</span></li><li data-rule="uppercase"><i class="ph-bold ph-circle" aria-hidden="true"></i><span>Al menos una letra mayúscula</span><span class="sr-only" data-rule-state>: pendiente</span></li><li data-rule="number"><i class="ph-bold ph-circle" aria-hidden="true"></i><span>Al menos un número</span><span class="sr-only" data-rule-state>: pendiente</span></li></ul>
+            <small>Máximo 128 caracteres.</small>
+          </section>
+          <p class="auth-feedback" data-auth-feedback role="status" aria-live="polite" hidden></p>
+          <div class="auth-actions"><a class="secondary-action" href="/music/">Cancelar</a><button class="primary-action" type="submit">Cambiar contraseña</button></div>
+        </form>
+      </section>
+    </section>
+  </main>
+</AdminAuthLayout>

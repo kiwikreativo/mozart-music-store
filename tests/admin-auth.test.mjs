@@ -1,0 +1,27 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+const directory=mkdtempSync(join(tmpdir(),'mozart-auth-test-'));
+process.env.ADMIN_AUTH_DB=join(directory,'admin.sqlite');
+const auth=await import('../src/server/admin-auth.mjs');
+test('single admin, hashing, sessions, password changes, revocation and throttling',async()=>{
+  assert.equal(await auth.login('admin','Initial123!'),null);
+  await auth.initializeAdmin('admin','Initial123!');
+  await assert.rejects(auth.initializeAdmin('second','Another123!'));
+  assert.equal(await auth.login('wrong','Initial123!'),null);
+  assert.equal(await auth.login('admin','wrong'),null);
+  const first=await auth.login('admin','Initial123!');const second=await auth.login('admin','Initial123!');
+  assert.ok(auth.sessionValid(first));assert.ok(auth.sessionValid(second));
+  assert.equal((await auth.changePassword(first,'wrong','Updated456!')).error,'current');
+  for(const bad of ['short','abcdefgh','ABCDEFGHI','12345678','A1'+'a'.repeat(127)]) assert.equal((await auth.changePassword(first,'Initial123!',bad)).error,'policy');
+  const changed=await auth.changePassword(first,'Initial123!','Updated456!');
+  assert.ok(auth.sessionValid(changed.token));assert.equal(auth.sessionValid(first),false);assert.equal(auth.sessionValid(second),false);
+  assert.equal(await auth.login('admin','Initial123!'),null);assert.ok(await auth.login('admin','Updated456!'));
+  auth.revokeSession(changed.token);assert.equal(auth.sessionValid(changed.token),false);
+  assert.equal((await auth.changePassword(changed.token,'Updated456!','Third789!')).error,'unauthorized');
+  for(let i=0;i<20;i++)assert.equal(auth.allowAttempt('test'),true);assert.equal(auth.allowAttempt('test'),false);
+  const disk=readFileSync(process.env.ADMIN_AUTH_DB);assert.equal(disk.includes(Buffer.from('Initial123!')),false);assert.equal(disk.includes(Buffer.from('Updated456!')),false);assert.equal(disk.includes(Buffer.from(first)),false);
+  rmSync(directory,{recursive:true,force:true});
+});

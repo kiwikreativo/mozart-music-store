@@ -1,6 +1,6 @@
 ---
 import type { CatalogCategory, CatalogProduct } from '../../data/catalog';
-import { productsFor } from '../../data/catalog';
+import { catalogCategories, productsFor } from '../../data/catalog';
 import CatalogCard from './CatalogCard.astro';
 import CatalogFilters from './CatalogFilters.astro';
 import { productDetailUrl } from '../../data/productDetails';
@@ -10,6 +10,9 @@ const { category, whatsappNumber, products: suppliedProducts } = Astro.props;
 const products = suppliedProducts ?? productsFor(category);
 const accessoryMode = category.group === 'accesorios';
 const isBrowseAllPage = category.slug === category.group;
+const categoryFilter = category.group === 'instrumentos' && isBrowseAllPage
+	? { key: 'category', label: 'Instrumentos', icon: 'ph-guitar', options: catalogCategories.filter((item) => item.group === 'instrumentos').map((item) => item.title) }
+	: undefined;
 const minPrice = Math.min(...products.map((product) => product.price));
 const maxPrice = Math.max(...products.map((product) => product.price));
 const whatsappLink = (product: string) => {
@@ -20,7 +23,7 @@ const whatsappLink = (product: string) => {
 <main class="catalog-page">
 	<header class="catalog-header"><p class="breadcrumb"><a href="/">Inicio</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i>{isBrowseAllPage ? <strong>{category.title}</strong> : <><a href={`/${category.group}`}>{category.group === 'audio' ? 'Audio' : 'Instrumentos'}</a><i class="ph-bold ph-caret-right" aria-hidden="true"></i><strong>{category.title}</strong></>}</p><h1>{category.title}</h1>{accessoryMode && <p class="catalog-lede">Encuentra accesorios para complementar, proteger y mantener tus instrumentos.</p>}</header>
 	<div class="catalog-toolbar"><button class="mobile-filter-toggle" type="button" data-open-filters>Filtrar productos <i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i></button><p data-result-count>Mostrando {products.length} productos</p><label class="sort-control">Ordenar por <select data-sort><option value="relevance">Relevancia</option><option value="low">Precio: menor a mayor</option><option value="high">Precio: mayor a menor</option><option value="newest">Novedades</option></select></label></div>
-	<div class="catalog-layout"><CatalogFilters filters={category.filters} brands={category.brands} types={category.types} {minPrice} {maxPrice} {accessoryMode} /><section class="catalog-results" aria-label={`Resultados de ${category.title.toLowerCase()}`}><div class="catalog-grid" data-product-grid>{products.map((product, index) => <CatalogCard product={product} metaKeys={accessoryMode ? ['instrumento'] : category.filters.map((filter) => filter.key)} productUrl={productDetailUrl(product)} whatsappUrl={whatsappLink(`${product.brand} ${product.model}`)} useUnicorn={index < 12} />)}</div><Pagination /><div class="catalog-empty" data-empty-state hidden><h2>{accessoryMode ? 'No encontramos accesorios que coincidan con estos filtros.' : 'No encontramos productos con estos filtros.'}</h2><p>Prueba limpiando los filtros para ver toda la selección.</p><button type="button" data-clear-filters>Limpiar filtros</button></div></section></div>
+	<div class="catalog-layout"><CatalogFilters filters={category.filters} brands={category.brands} types={category.types} {minPrice} {maxPrice} {accessoryMode} {categoryFilter} /><section class="catalog-results" aria-label={`Resultados de ${category.title.toLowerCase()}`}><div class="catalog-grid" data-product-grid>{products.map((product, index) => <CatalogCard product={product} metaKeys={accessoryMode ? ['instrumento'] : category.filters.map((filter) => filter.key)} productUrl={productDetailUrl(product)} whatsappUrl={whatsappLink(`${product.brand} ${product.model}`)} useUnicorn={index < 12} />)}</div><Pagination /><div class="catalog-empty" data-empty-state hidden><h2>{accessoryMode ? 'No encontramos accesorios que coincidan con estos filtros.' : 'No encontramos productos con estos filtros.'}</h2><p>Prueba limpiando los filtros para ver toda la selección.</p><button type="button" data-clear-filters>Limpiar filtros</button></div></section></div>
 </main>
 
 <script>

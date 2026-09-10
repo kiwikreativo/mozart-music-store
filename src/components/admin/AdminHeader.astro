@@ -1,0 +1,64 @@
+---
+const { search = true } = Astro.props;
+---
+<header class="admin-header"><div class="admin-utilities">{search && <label class="admin-search"><i class="ph-bold ph-magnifying-glass" aria-hidden="true"></i><input data-search type="search" placeholder="Buscar productos" aria-label="Buscar productos"></label>}<div class="admin-theme theme-switch" role="group" aria-label="Seleccionar tema"><button type="button" data-theme-choice="light" aria-label="Usar tema claro"><i class="ph-bold ph-sun" aria-hidden="true"></i></button><button type="button" data-theme-choice="dark" aria-label="Usar tema oscuro"><i class="ph-bold ph-moon" aria-hidden="true"></i></button></div><div class="admin-profile-wrapper"><button class="admin-profile" type="button" data-profile aria-expanded="false" aria-controls="admin-profile-menu"><span class="avatar">A</span><span>Admin</span><i class="ph-bold ph-caret-down" aria-hidden="true"></i></button><div id="admin-profile-menu" class="profile-menu" data-profile-menu hidden><button type="button" data-change-password>Cambiar contraseña</button><button type="button" data-logout>Cerrar sesión</button></div></div></div></header>
+<script>
+// Own each mounted dropdown once; discard document listeners before an Astro swap.
+let disposeProfileMenu: (() => void) | undefined;
+function initializeProfileMenu() {
+  disposeProfileMenu?.();
+  const trigger = document.querySelector<HTMLButtonElement>('[data-profile]');
+  const menu = document.querySelector<HTMLElement>('[data-profile-menu]');
+  if (!trigger || !menu) return;
+
+  const controller = new AbortController();
+  const options = { signal: controller.signal };
+  let isProfileMenuOpen = false;
+  function setProfileMenuState(open: boolean) {
+    isProfileMenuOpen = open;
+    menu!.hidden = !open;
+    trigger!.setAttribute('aria-expanded', String(open));
+  }
+  setProfileMenuState(false);
+  trigger.addEventListener('click', () => {
+    setProfileMenuState(!isProfileMenuOpen);
+  }, options);
+  menu.addEventListener('click', (event) => {
+    if (event.target instanceof Element && event.target.closest('button')) {
+      setProfileMenuState(false);
+      // Keep keyboard focus out of the now-hidden disclosure.
+      if (menu.contains(document.activeElement)) trigger.focus();
+    }
+  }, options);
+  document.addEventListener('click', (event) => {
+    if (event.target instanceof Node &&
+        !trigger.contains(event.target) && !menu.contains(event.target)) {
+      setProfileMenuState(false);
+    }
+  }, options);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isProfileMenuOpen) {
+      setProfileMenuState(false);
+      trigger.focus();
+    }
+  }, options);
+  document.addEventListener('focusin', (event) => {
+    if (event.target instanceof Node &&
+        !trigger.contains(event.target) && !menu.contains(event.target)) {
+      setProfileMenuState(false);
+    }
+  }, options);
+  disposeProfileMenu = () => {
+    setProfileMenuState(false);
+    controller.abort();
+    disposeProfileMenu = undefined;
+  };
+}
+initializeProfileMenu();
+document.addEventListener('astro:page-load', initializeProfileMenu);
+document.addEventListener('astro:before-swap', () => disposeProfileMenu?.());
+window.addEventListener('pageshow', initializeProfileMenu);
+</script>
+<script>
+import "../../scripts/admin-account";
+</script>

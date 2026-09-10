@@ -1,0 +1,20 @@
+---
+import '../styles/admin.css';
+import '../styles/admin-auth.css';
+import '@phosphor-icons/web/bold';
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>{title} | Mozart</title>
+  <link rel="stylesheet" href="/fonts/music/fonts.css" />
+  <script is:inline>
+    (() => {let theme;try{theme=localStorage.getItem('mozart-theme')}catch{};theme=theme==='light'||theme==='dark'?theme:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme})();
+  </script>
+</head>
+<body class="auth-body"><slot /></body>
+</html>
+<script>import '../scripts/admin-account';</script>
